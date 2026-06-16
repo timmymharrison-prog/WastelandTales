@@ -154,6 +154,20 @@
   .logentry{font-size:14px;line-height:1.6;padding:6px 0;border-bottom:1px dotted var(--line);}
   .logentry b{color:var(--bright);font-weight:500;}
 
+  /* ---------- collapsible sections in Pip-Boy ---------- */
+  .pip-section{}
+  .pip-section-hdr{
+    display:flex;align-items:center;justify-content:space-between;cursor:pointer;
+    font-family:"VT323",monospace;font-size:20px;color:var(--dim);letter-spacing:2px;
+    text-transform:uppercase;margin:18px 0 0;border-bottom:1px solid var(--line);padding-bottom:3px;
+    user-select:none;-webkit-user-select:none;touch-action:manipulation;
+  }
+  .pip-section-hdr:hover{color:var(--green);}
+  .pip-section-hdr .caret{font-size:16px;transition:transform .18s;}
+  .pip-section-hdr.collapsed .caret{transform:rotate(-90deg);}
+  .pip-section-body{overflow:hidden;transition:max-height .22s ease,opacity .18s;}
+  .pip-section-body.collapsed{max-height:0!important;opacity:0;pointer-events:none;}
+
   /* momentum scrolling on the two scroll regions */
   .screen, .pip-body{ -webkit-overflow-scrolling:touch; }
   /* kill tap-delay / accidental double-tap zoom on controls */
@@ -245,6 +259,7 @@
       <button class="pip-tab active" data-tab="stat">STAT</button>
       <button class="pip-tab" data-tab="inv">INV</button>
       <button class="pip-tab" data-tab="data">DATA</button>
+      <button class="pip-tab" data-tab="opts">OPTS</button>
       <button class="pip-btn pip-close" id="pipClose">CLOSE ✕</button>
     </div>
     <div class="pip-body" id="pipBody"></div>
@@ -1534,6 +1549,7 @@ document.querySelectorAll(".pip-tab").forEach(t=>t.addEventListener("click",()=>
 function renderPip(){
   if(activeTab==="stat") renderStat();
   else if(activeTab==="inv") renderInv();
+  else if(activeTab==="opts") renderOpts();
   else renderData();
 }
 
@@ -1619,47 +1635,89 @@ function renderInv(){
   }));
 }
 
+/* shared helper: builds a collapsible section, auto-expands the first time */
+const _collapsed={};
+function pipSection(id, label, bodyHtml, defaultOpen=true){
+  const open = _collapsed[id]===undefined ? defaultOpen : !_collapsed[id];
+  return `<div class="pip-section">
+    <div class="pip-section-hdr${open?'':' collapsed'}" data-sec="${id}">
+      ${label}<span class="caret">▾</span>
+    </div>
+    <div class="pip-section-body${open?'':' collapsed'}" id="sec-${id}" style="max-height:${open?'2000px':'0'}">
+      <div style="padding:6px 0 4px">${bodyHtml}</div>
+    </div>
+  </div>`;
+}
+function wireCollapsibles(){
+  pipBody.querySelectorAll(".pip-section-hdr").forEach(hdr=>{
+    hdr.addEventListener("click",()=>{
+      const id=hdr.dataset.sec, body=document.getElementById("sec-"+id);
+      const closing=!hdr.classList.contains("collapsed");
+      hdr.classList.toggle("collapsed", closing);
+      body.classList.toggle("collapsed", closing);
+      body.style.maxHeight = closing ? "0" : "2000px";
+      _collapsed[id]=closing;
+    });
+  });
+}
+
 function renderData(){
   let html="";
   const anyBond = state.bonds && (state.bonds.robin||state.bonds.cass||state.bonds.sam);
   if(anyBond){
-    html+=`<div class="secthead">The People You Carry</div>`;
     const tie=(name,who,line)=>{
       const b=state.bonds[who]||0;
       const hearts = b>=5?"●●●":b>=3?"●●○":b>=1?"●○○":"○○○";
       return `<div class="logentry"><b>${name}</b> &nbsp;<span style="color:var(--warn)">${hearts}</span><br><span style="color:var(--dim)">${line}</span></div>`;
     };
-    html+=tie("Dax","robin","Your best friend since the nursery. Borrowed you a 10mm and a promise to drag you home.");
-    html+=tie("Cassara","cass","The one you love — Cass, to you. Hydroponics dreamer, waiting under a painted sky for the real one.");
-    html+=tie("Lark","sam","Your kid sister. Lent you her lucky cap. The rule is you bring it back.");
+    const bonds =
+      tie("Dax","robin","Your best friend since the nursery. Borrowed you a 10mm and a promise to drag you home.")+
+      tie("Cassara","cass","The one you love — Cass, to you. Hydroponics dreamer, waiting under a painted sky for the real one.")+
+      tie("Lark","sam","Your kid sister. Lent you her lucky cap. The rule is you bring it back.");
+    html+=pipSection("bonds","The People You Carry", bonds, true);
   }
-  html+=`<div class="secthead">Quest Log & Journal</div>`;
-  if(state.log.length===0){ html+=`<div class="empty">No entries yet. Your story is just beginning.</div>`; }
-  else state.log.forEach(e=>{ html+=`<div class="logentry">› ${e}</div>`; });
+  const logBody = state.log.length===0
+    ? `<div class="empty">No entries yet. Your story is just beginning.</div>`
+    : state.log.map(e=>`<div class="logentry">› ${e}</div>`).join("");
+  html+=pipSection("log","Quest Log & Journal", logBody, true);
 
-  html+=`<div class="secthead">Cloud Sync</div>${cloudStatusHTML()}`;
+  pipBody.innerHTML=html;
+  wireCollapsibles();
+}
 
-  html+=`<div class="secthead">Transfer (save code)</div>
+function renderOpts(){
+  /* ---- Cloud Sync section ---- */
+  const cloudBody = cloudStatusHTML();
+
+  /* ---- Transfer section ---- */
+  const transferBody = `
     <div style="font-size:13px;color:var(--dim);line-height:1.6;margin-bottom:8px">
-      Move <i>this exact run</i> to any device — your phone, a laptop, your hosted copy. Export a code here, paste it there. Works everywhere, even to carry this run out of Claude.</div>
+      Move <i>this exact run</i> to any device. Export a code, send it to yourself, paste it there.</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <button class="iact" id="expBtn">EXPORT SAVE CODE</button>
+      <button class="iact" id="expBtn">EXPORT CODE</button>
       <button class="iact" id="impBtn">PASTE A CODE</button>
     </div>
     <textarea id="codeBox" spellcheck="false" placeholder=""
       style="display:none;width:100%;height:68px;margin-top:8px;background:rgba(54,255,126,.06);border:1px solid var(--dim);color:var(--bright);font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.4;padding:8px;border-radius:5px;resize:vertical"></textarea>
     <div id="impRow" style="display:none;margin-top:6px"><button class="iact" id="impLoad">LOAD THIS CODE</button></div>`;
 
-  html+=`<div class="secthead">This Device</div>
+  /* ---- This Device section ---- */
+  const deviceBody = `
     <div style="font-size:13px;color:var(--dim);line-height:1.6;margin-bottom:8px">
-      Progress saves automatically after every scene${cloud.user?" and syncs to the cloud":""}. Reopen anytime and pick <b style="color:var(--green)">Continue</b>.</div>
+      Saves automatically after every scene${cloud.user?" and syncs to the cloud":""}. Reopen anytime and pick <b style="color:var(--green)">Continue</b>.</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
       <button class="iact" id="manualSave">SAVE NOW</button>
       <button class="iact" id="eraseBtn" style="border-color:var(--danger);color:var(--danger)">ERASE &amp; RESTART</button>
     </div>`;
-  pipBody.innerHTML=html;
 
+  pipBody.innerHTML =
+    pipSection("cloud", "Cloud Sync", cloudBody, true)+
+    pipSection("transfer", "Transfer (save code)", transferBody, false)+
+    pipSection("device", "This Device", deviceBody, false);
+
+  wireCollapsibles();
   wireCloudUI();
+
   const ms=document.getElementById("manualSave");
   if(ms) ms.addEventListener("click", async ()=>{ const ok=await saveGame(); toast(ok?(cloud.user?"SAVED · SYNCED":"PROGRESS SAVED"):"SAVE UNAVAILABLE HERE"); });
   const eb=document.getElementById("eraseBtn");
@@ -1887,7 +1945,7 @@ function wireCloudUI(){
   if(g("cPush"))   g("cPush").addEventListener("click", async()=>{ const ok=await cloudSave({v:2,story:currentStoryId,node:currentNodeId,state}); toast(ok?"UPLOADED TO CLOUD":"UPLOAD FAILED"); });
   if(g("cPull"))   g("cPull").addEventListener("click", async()=>{ const c=await cloudLoad(); if(c&&c.state&&c.node){ resumeGame(c); toast("CLOUD SAVE LOADED"); } else toast("NO CLOUD SAVE YET"); });
 }
-function updateCloudUI(){ if(pip.classList.contains("open") && activeTab==="data") renderData(); }
+function updateCloudUI(){ if(pip.classList.contains("open") && (activeTab==="opts"||activeTab==="data")) renderPip(); }
 
 function start(){
   state=freshState();
