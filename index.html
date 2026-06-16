@@ -1,0 +1,1735 @@
+<!-- VAULT 73: THE LONG WALK HOME — a Fallout fan-fiction gamebook -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --screen:#02160b;
+    --screen-edge:#010a05;
+    --green:#36ff7e;
+    --dim:#15994a;
+    --bright:#c9ffdd;
+    --warn:#ffd23b;
+    --danger:#ff5a3c;
+    --glow:rgba(54,255,126,.28);
+    --line:rgba(54,255,126,.18);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;height:100%;background:#000;}
+  body{
+    font-family:"JetBrains Mono",ui-monospace,monospace;color:var(--green);
+    display:flex;align-items:center;justify-content:center;padding:14px;min-height:100%;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .monitor{
+    width:100%;max-width:760px;height:min(88vh,820px);
+    background:radial-gradient(120% 130% at 50% 38%, var(--screen) 55%, var(--screen-edge) 100%);
+    border-radius:22px;padding:26px 28px 22px;position:relative;overflow:hidden;
+    display:flex;flex-direction:column;
+    box-shadow:0 0 0 2px rgba(54,255,126,.08),0 0 90px rgba(54,255,126,.05),
+      inset 0 0 130px rgba(0,0,0,.7),inset 0 0 28px rgba(54,255,126,.05);
+  }
+  .monitor::before{content:"";position:absolute;inset:0;border-radius:22px;pointer-events:none;z-index:30;
+    background:radial-gradient(110% 120% at 50% 50%, transparent 58%, rgba(0,0,0,.6) 100%);}
+  .monitor::after{content:"";position:absolute;inset:0;border-radius:22px;pointer-events:none;z-index:31;
+    background:repeating-linear-gradient(to bottom,rgba(0,0,0,0) 0 2px,rgba(0,0,0,.16) 3px,rgba(0,0,0,0) 4px);
+    animation:flicker 5.5s steps(60) infinite;mix-blend-mode:multiply;}
+  @keyframes flicker{0%,100%{opacity:.55}48%{opacity:.42}49%{opacity:.6}92%{opacity:.5}93%{opacity:.62}}
+
+  /* ---------- HUD ---------- */
+  .hud{flex:none;display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+    border-bottom:1px solid var(--line);padding-bottom:11px;margin-bottom:12px;
+    font-family:"VT323",monospace;font-size:21px;letter-spacing:.5px;text-shadow:0 0 8px var(--glow);}
+  .badge{display:flex;align-items:center;gap:7px;color:var(--bright);}
+  .badge svg{filter:drop-shadow(0 0 5px var(--glow));}
+  .tag{color:var(--dim);}
+  .who{color:var(--bright);}
+  .bar{display:flex;align-items:center;gap:7px;}
+  .meter{width:88px;height:13px;border:1px solid var(--dim);padding:1px;display:flex;gap:1px;}
+  .meter i{flex:1;background:var(--green);box-shadow:0 0 6px var(--glow);transition:opacity .2s;}
+  .meter i.off{background:transparent;box-shadow:none;}
+  .meter.rads i{background:var(--warn);}
+  .meter.rads.hot i{background:var(--danger);}
+  .spacer{flex:1;}
+  .pip-btn{font-family:"VT323",monospace;font-size:20px;letter-spacing:1px;cursor:pointer;
+    background:transparent;border:1px solid var(--dim);color:var(--green);padding:3px 12px;border-radius:5px;
+    text-shadow:0 0 8px var(--glow);transition:background .12s,color .12s;}
+  .pip-btn:hover,.pip-btn:focus-visible{background:rgba(54,255,126,.14);color:var(--bright);outline:none;}
+  .pip-btn[disabled]{opacity:.4;cursor:not-allowed;}
+  .pip-btn[disabled]:hover{background:transparent;color:var(--green);}
+
+  /* ---------- screen ---------- */
+  .screen{flex:1;overflow-y:auto;padding-right:8px;position:relative;z-index:4;text-shadow:0 0 7px var(--glow);}
+  .screen::-webkit-scrollbar{width:8px;}
+  .screen::-webkit-scrollbar-thumb{background:var(--dim);border-radius:8px;}
+  .crumb{font-family:"VT323",monospace;font-size:18px;color:var(--dim);letter-spacing:2px;
+    text-transform:uppercase;margin-bottom:10px;}
+  .prose{font-size:15.5px;line-height:1.72;white-space:pre-wrap;}
+  .prose .say{color:var(--bright);}
+  .prose .bad{color:var(--danger);}
+  .prose .ok{color:var(--warn);}
+  .cursor{display:inline-block;width:9px;height:18px;margin-left:2px;background:var(--green);
+    box-shadow:0 0 8px var(--glow);vertical-align:-3px;animation:blink 1.05s steps(1) infinite;}
+  @keyframes blink{50%{opacity:0}}
+
+  /* ---------- choices ---------- */
+  .choices{flex:none;margin-top:12px;border-top:1px solid var(--line);padding-top:12px;position:relative;z-index:4;}
+  .choice{display:block;width:100%;text-align:left;cursor:pointer;background:transparent;
+    border:1px solid transparent;color:var(--green);font-family:"VT323",monospace;font-size:20px;
+    letter-spacing:.4px;padding:7px 12px;margin:3px 0;line-height:1.25;border-radius:4px;
+    text-shadow:0 0 8px var(--glow);transition:background .12s,border-color .12s,color .12s;}
+  .choice .k{color:var(--dim);margin-right:10px;}
+  .choice .req{color:var(--warn);}
+  .choice:hover,.choice:focus-visible{background:rgba(54,255,126,.12);border-color:var(--dim);color:var(--bright);outline:none;}
+  .choice:hover .k,.choice:focus-visible .k{color:var(--bright);}
+  .choice.locked{color:var(--dim);cursor:not-allowed;text-shadow:none;}
+  .choice.locked .req{color:var(--danger);}
+  .choice.locked:hover{background:transparent;border-color:transparent;color:var(--dim);}
+  .choice.loot{color:var(--bright);}
+  .choice.loot .k{color:var(--warn);}
+  .choice.restart{color:var(--warn);}
+  .choice.restart .k{color:var(--warn);}
+  .skiphint{font-family:"VT323",monospace;font-size:15px;color:var(--dim);text-align:right;
+    margin-top:6px;letter-spacing:1px;opacity:.7;height:16px;}
+  .toast{position:absolute;left:50%;bottom:74px;transform:translateX(-50%);z-index:40;
+    font-family:"VT323",monospace;font-size:19px;letter-spacing:.6px;color:var(--bright);
+    background:rgba(2,22,11,.92);border:1px solid var(--dim);padding:6px 16px;border-radius:6px;
+    text-shadow:0 0 8px var(--glow);opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;}
+  .toast.show{opacity:1;}
+
+  /* ---------- PIP-BOY overlay ---------- */
+  .pip{position:absolute;inset:0;z-index:25;background:rgba(2,18,9,.97);border-radius:22px;
+    display:none;flex-direction:column;padding:24px 28px;}
+  .pip.open{display:flex;}
+  .pip-tabs{flex:none;display:flex;gap:6px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:12px;
+    font-family:"VT323",monospace;font-size:21px;letter-spacing:1px;}
+  .pip-tab{cursor:pointer;background:transparent;border:none;color:var(--dim);padding:3px 14px;border-radius:4px;
+    text-shadow:0 0 8px var(--glow);}
+  .pip-tab.active{color:var(--bright);background:rgba(54,255,126,.12);}
+  .pip-tab:hover{color:var(--green);}
+  .pip-close{margin-left:auto;}
+  .pip-body{flex:1;overflow-y:auto;padding-right:8px;text-shadow:0 0 7px var(--glow);}
+  .pip-body::-webkit-scrollbar{width:8px;}
+  .pip-body::-webkit-scrollbar-thumb{background:var(--dim);border-radius:8px;}
+
+  .stat-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;
+    border-bottom:1px dotted var(--line);font-size:15px;}
+  .stat-row .nm{color:var(--green);}
+  .stat-row .vl{color:var(--bright);font-family:"VT323",monospace;font-size:21px;}
+  .special-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin:14px 0 4px;}
+  .sp{border:1px solid var(--dim);border-radius:5px;text-align:center;padding:7px 2px;}
+  .sp .l{font-family:"VT323",monospace;font-size:22px;color:var(--bright);}
+  .sp .n{font-family:"VT323",monospace;font-size:26px;color:var(--green);line-height:1;}
+  .sp .full{font-size:11px;color:var(--dim);letter-spacing:.3px;}
+  .secthead{font-family:"VT323",monospace;font-size:20px;color:var(--dim);letter-spacing:2px;
+    text-transform:uppercase;margin:18px 0 6px;border-bottom:1px solid var(--line);padding-bottom:3px;}
+
+  .cap-line{font-family:"VT323",monospace;font-size:19px;color:var(--warn);margin:2px 0 10px;}
+  .invcat{margin-bottom:14px;}
+  .invcat h4{font-family:"VT323",monospace;font-size:19px;color:var(--dim);letter-spacing:1.5px;
+    text-transform:uppercase;margin:0 0 5px;}
+  .item{display:flex;align-items:center;gap:10px;padding:6px 8px;border:1px solid transparent;border-radius:5px;}
+  .item:hover{background:rgba(54,255,126,.07);border-color:var(--line);}
+  .item .iname{flex:1;font-size:14.5px;}
+  .item .iname small{display:block;color:var(--dim);font-size:12.5px;line-height:1.4;}
+  .item .qty{color:var(--warn);font-family:"VT323",monospace;font-size:18px;min-width:30px;text-align:right;}
+  .item .eqd{color:var(--warn);font-family:"VT323",monospace;font-size:16px;letter-spacing:1px;}
+  .iact{font-family:"VT323",monospace;font-size:17px;cursor:pointer;background:transparent;
+    border:1px solid var(--dim);color:var(--green);padding:1px 9px;border-radius:4px;letter-spacing:.5px;}
+  .iact:hover{background:rgba(54,255,126,.14);color:var(--bright);}
+  .empty{color:var(--dim);font-size:13.5px;font-style:italic;padding:4px 8px;}
+  .packline{font-family:"VT323",monospace;font-size:20px;color:var(--bright);margin-bottom:4px;}
+  .capbar{height:12px;border:1px solid var(--dim);display:flex;gap:1px;padding:1px;margin:4px 0 14px;}
+  .capbar i{flex:1;background:var(--green);box-shadow:0 0 5px var(--glow);}
+  .capbar i.off{background:transparent;box-shadow:none;}
+  .logentry{font-size:14px;line-height:1.6;padding:6px 0;border-bottom:1px dotted var(--line);}
+  .logentry b{color:var(--bright);font-weight:500;}
+
+  @media (max-width:560px){
+    .monitor{padding:18px 16px;height:92vh;}
+    .hud{font-size:18px;gap:10px;}
+    .meter{width:62px;}
+    .prose{font-size:15px;}
+    .special-grid{grid-template-columns:repeat(4,1fr);}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .monitor::after{animation:none;opacity:.45;}.cursor{animation:none;}
+  }
+</style>
+
+<div class="monitor" role="application" aria-label="Pip-Boy interactive gamebook">
+  <div class="hud" id="hud">
+    <span class="badge" id="vaultBadge">
+      <svg width="20" height="22" viewBox="0 0 20 22" fill="none" aria-hidden="true">
+        <circle cx="10" cy="6" r="3.4" stroke="currentColor" stroke-width="1.4"/>
+        <path d="M3.5 20c0-4.2 2.9-7 6.5-7s6.5 2.8 6.5 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+      <span class="who" id="charName">VAULT 73</span>
+    </span>
+    <span class="bar"><span class="tag">HP</span><span class="meter" id="hpMeter"></span></span>
+    <span class="bar"><span class="tag">RAD</span><span class="meter rads" id="radMeter"></span></span>
+    <span class="spacer"></span>
+    <button class="pip-btn" id="pipOpen" disabled>▸ PIP-BOY</button>
+  </div>
+
+  <div class="screen" id="screen">
+    <div class="crumb" id="crumb">VAULT 73 — RECLAMATION CONTROL</div>
+    <div class="prose" id="prose"></div>
+  </div>
+
+  <div class="choices" id="choices"></div>
+  <div class="skiphint" id="skiphint"></div>
+  <div class="toast" id="toast"></div>
+
+  <!-- PIP-BOY -->
+  <div class="pip" id="pip" aria-hidden="true">
+    <div class="pip-tabs">
+      <button class="pip-tab active" data-tab="stat">STAT</button>
+      <button class="pip-tab" data-tab="inv">INV</button>
+      <button class="pip-tab" data-tab="data">DATA</button>
+      <button class="pip-btn pip-close" id="pipClose">CLOSE ✕</button>
+    </div>
+    <div class="pip-body" id="pipBody"></div>
+  </div>
+</div>
+
+<script>
+/* =====================================================================
+   VAULT 73: THE LONG WALK HOME
+   A Fallout fan-fiction gamebook. Original characters & locations set
+   within the established Fallout universe. Mojave region, year 2284.
+   ===================================================================== */
+
+/* ---------------------- ITEM DATABASE ---------------------- */
+const ITEMS = {
+  // apparel
+  vaultsuit:{name:"Vault 73 Jumpsuit",cat:"apparel",def:3,size:1,desc:"Snug, blue, and absurdly clean for the wasteland."},
+  leather_armor:{name:"Leather Armor",cat:"apparel",def:12,size:2,desc:"Riveted hide over the shoulders. Smells of old smoke."},
+  reinforced_jacket:{name:"Reinforced Trail Jacket",cat:"apparel",def:18,size:2,desc:"Caravan-grade. Plates sewn into the lining."},
+  // weapons
+  combat_knife:{name:"Combat Knife",cat:"weapon",kind:"melee",dmg:11,size:1,desc:"Standard-issue Vault security blade. Keeps an edge."},
+  pistol10mm:{name:"10mm Pistol",cat:"weapon",kind:"gun",dmg:22,ammo:"ammo10mm",size:2,desc:"RobCo sidearm. Reliable. Loud."},
+  pipe_rifle:{name:"Pipe Rifle",cat:"weapon",kind:"gun",dmg:17,ammo:"ammo556",size:3,desc:"Wasteland scrap-gun. Ugly, but it shoots."},
+  tire_iron:{name:"Tire Iron",cat:"weapon",kind:"melee",dmg:14,size:2,desc:"Heavy enough to argue with a raider."},
+  // ammo
+  ammo10mm:{name:"10mm Rounds",cat:"ammo",size:0,desc:"Brass and lead. Currency that kills."},
+  ammo556:{name:"5.56mm Rounds",cat:"ammo",size:0,desc:"For rifles and bad decisions."},
+  // aid
+  stimpak:{name:"Stimpak",cat:"aid",size:1,use:{hp:35},desc:"+35 HP. The wasteland's best friend."},
+  radaway:{name:"RadAway",cat:"aid",size:1,use:{rads:-40},desc:"-40 RAD. A bag of glowing regret."},
+  radx:{name:"Rad-X",cat:"aid",size:1,use:{rads:-15},desc:"-15 RAD. Best taken before the glow, not after."},
+  // food
+  nukacola:{name:"Nuka-Cola",cat:"food",size:1,use:{hp:12,rads:3},desc:"+12 HP, faint glow. The taste of a dead world."},
+  cram:{name:"Cram",cat:"food",size:1,use:{hp:9},desc:"+9 HP. Salt-cured mystery meat in a tin."},
+  purified_water:{name:"Purified Water",cat:"food",size:1,use:{hp:18},desc:"+18 HP. Clean water. Worth its weight in caps out here."},
+  // packs
+  satchel:{name:"Leather Satchel",cat:"pack",capacity:6,size:0,desc:"A dead wanderer's shoulder bag. Six slots."},
+  rucksack:{name:"Trail Rucksack",cat:"pack",capacity:12,size:0,desc:"Frame-and-canvas caravan pack. Twelve slots."},
+  // act one
+  vault_field_pack:{name:"Vault 73 Field Pack",cat:"pack",capacity:6,size:0,desc:"A small issue pack from the vault stores. Six slots — all they could spare."},
+  vault_wrench:{name:"Vault 73 Wrench",cat:"weapon",kind:"melee",dmg:13,size:1,desc:"Your wrench. You know its weight better than your own hand."},
+  sams_cap:{name:"Sam's Lucky Cap",cat:"misc",size:0,desc:"A scuffed bottle cap your sibling pressed into your palm. \"So you remember to come back.\""},
+  cass_locket:{name:"Cass's Photo",cat:"misc",size:0,desc:"A cracked photo of the two of you by the hydroponics lights. Worth more than caps."},
+};
+const SPECIAL_NAMES={S:"STRENGTH",P:"PERCEPTION",E:"ENDURANCE",C:"CHARISMA",I:"INTELLIGENCE",A:"AGILITY",L:"LUCK"};
+
+/* ---------------------- STATE ---------------------- */
+let state;
+function freshState(){
+  return {
+    name:"DWELLER",
+    hp:100, maxHp:100, rads:0, caps:0,
+    sp:{S:4,P:4,E:4,C:4,I:4,A:4,L:4},   // grows through the choices of your last ordinary day
+    bonds:{robin:0,cass:0,sam:0},
+    inv:{}, equippedWeapon:null, wornApparel:null, pack:null,
+    flags:{}, log:[],
+  };
+}
+
+/* ---------------------- INVENTORY HELPERS ---------------------- */
+const has = id => (state.inv[id]||0) > 0;
+const capCount = () => state.pack ? ITEMS[state.pack].capacity : 2;
+function usedSlots(){
+  let n=0;
+  for(const id in state.inv){
+    if(state.inv[id]<=0) continue;
+    if(id===state.equippedWeapon||id===state.wornApparel||id===state.pack) continue;
+    if(ITEMS[id].cat==="ammo") continue;
+    n += ITEMS[id].size * state.inv[id];
+  }
+  return n;
+}
+function roomFor(id){ return usedSlots()+ (ITEMS[id].size||0) <= capCount(); }
+
+function addItem(id, qty=1){ state.inv[id]=(state.inv[id]||0)+qty; }
+function removeItem(id, qty=1){
+  if(!state.inv[id]) return;
+  state.inv[id]-=qty;
+  if(state.inv[id]<=0){
+    delete state.inv[id];
+    if(state.equippedWeapon===id) state.equippedWeapon=null;
+    if(state.wornApparel===id) state.wornApparel=null;
+  }
+}
+function equipPack(id){
+  // transfer to new pack, leave old behind
+  if(state.pack && state.pack!==id) removeItem(state.pack);
+  state.pack=id; addItem(id,1);
+}
+function useItem(id){
+  const it=ITEMS[id]; if(!it.use) return;
+  if(it.use.hp) state.hp=Math.min(state.maxHp, state.hp+it.use.hp);
+  if(it.use.rads!=null) state.rads=Math.max(0, Math.min(100, state.rads+it.use.rads));
+  removeItem(id,1);
+}
+
+/* ---------------------- STORY EFFECT BUILDERS ---------------------- */
+const give = (id,q=1)=>()=>addItem(id,q);
+const wear = id=>()=>{ addItem(id,1); state.wornApparel=id; };
+const arm  = id=>()=>{ addItem(id,1); state.equippedWeapon=id; };
+const setPack = id=>()=>equipPack(id);
+const hurt = n=>()=>{ state.hp=Math.max(0, state.hp - Math.max(1, n - Math.floor((state.wornApparel?ITEMS[state.wornApparel].def:0)/3))); };
+const heal = n=>()=>{ state.hp=Math.min(state.maxHp, state.hp+n); };
+const rad  = n=>()=>{ state.rads=Math.min(100, state.rads+n); };
+const caps = n=>()=>{ state.caps=Math.max(0, state.caps+n); };
+const flag = f=>()=>{ state.flags[f]=true; };
+const logIt = (t)=>()=>{ state.log.unshift(t); };
+function chain(...fns){ return ()=>fns.forEach(f=>f()); }
+
+/* Act One: shape who you are through what you do */
+const sp   = (k,n=1)=>()=>{ state.sp[k]=Math.min(9,(state.sp[k]||0)+n); };
+const bond = (who,n=1)=>()=>{ state.bonds[who]=(state.bonds[who]||0)+n; };
+const TITLES={S:"THE BRUISER",P:"THE SHARP EYE",E:"THE UNBROKEN",C:"THE SILVER TONGUE",I:"THE TINKERER",A:"THE QUICK HAND",L:"THE LONG SHOT"};
+function deriveTitle(){
+  let best="I", bestv=-1;
+  for(const k of ["S","P","E","C","I","A","L"]){ if(state.sp[k]>bestv){ bestv=state.sp[k]; best=k; } }
+  state.name = TITLES[best];
+  return state.name;
+}
+function specialLine(){
+  return ["S","P","E","C","I","A","L"].map(k=>`${k} ${state.sp[k]}`).join("  ");
+}
+
+const weaponDmg = ()=>{
+  const w=state.equippedWeapon; if(!w) return 0;
+  const it=ITEMS[w];
+  if(it.kind==="gun" && !has(it.ammo)) return Math.floor(it.dmg*0.15); // pistol-whip, basically useless
+  return it.dmg;
+};
+const hasUsableWeapon = ()=> weaponDmg() >= 10;
+
+/* =====================================================================
+   STORY NODES
+   ===================================================================== */
+const NODES = {
+
+/* ================= ACT ONE: THE LAST ORDINARY DAY ================= */
+intro:{
+  crumb:"VAULT 73 · RESIDENTIAL · 06:14",
+  text:
+`You wake the way you always do — to the hum. Two hundred years of unbroken machine-breath in the walls, so constant you only notice it in dreams, where the world is silent and wrong.
+
+Then you notice the other thing: a weight on your legs and a grin three inches from your face. Sam, your younger sibling, has climbed onto your bunk to wake you the way they've done since they could walk.
+
+<span class="say">"You're late, you're late, you slept through the bell,"</span> Sam announces, delighted. <span class="say">"Robin already went down. And the shower on our level's doing the spitty thing again — Mr. Okafor was cussing about it. Third time this week!"</span> They flop back dramatically. <span class="say">"Everybody says you're the only one who can fix anything. So fix the water before it gets weird, okay? It's getting weird."</span>
+
+You're the vault's utility tech — the one they send when a door won't seal or a pump skips a beat. Around here they call you Sparks. It's a small life, three hundred meters of steel and a sky painted on the cafeteria ceiling. But it's yours, and the people in it are yours, and this morning that feels like enough.`,
+  choices:[
+    { key:"1", label:"Pull the shower regulator apart before shift — that \"spitty thing\" is bugging you.",
+      to:"a_mess", effect:chain(sp("I",1), sp("P",1), flag("noticed_water"),
+        logIt("Morning: you tore into the level's water regulator before shift. Pressure's down — and it's not the regulator.")) },
+    { key:"2", label:"Race Sam down to the mess and let them win by a hair.",
+      to:"a_mess", effect:chain(sp("A",1), bond("sam",1),
+        logIt("Morning: raced Sam to the mess and let them win. Their laugh is the best sound in the vault.")) },
+    { key:"3", label:"Knock out your morning lifting set first — old habit, keeps you steady.",
+      to:"a_mess", effect:chain(sp("S",1), sp("E",1),
+        logIt("Morning: got your lifting set in before shift, same as every day.")) },
+  ]
+},
+
+a_mess:{
+  crumb:"VAULT 73 · MESS HALL · 06:40",
+  text:
+`The mess smells of reconstituted eggs and chlorine. Robin's already at your usual table, boots up on a chair, holding it for you the way they have since you were both eight and the bigger kids ran the cafeteria.
+
+<span class="say">"There's Sparks,"</span> Robin says, kicking the chair out for you. <span class="say">"You hear? Pressure's down on three levels now, not just ours. Maintenance is 'monitoring it.'"</span> They make air-quotes with a fork. <span class="say">"Which is maintenance for 'we have no idea.' Tell me you have an idea. You always have an idea."</span>
+
+Down the table, old Okafor grumbles that in his grandmother's day the taps never so much as hiccuped, and a couple of the younger dwellers go quiet, the way people do when a small worry starts looking for somewhere to grow.`,
+  choices:[
+    { key:"1", label:"\"It's not the regulators. If three levels are dropping together, it's upstream — the intake.\"",
+      to:"a_servo", effect:chain(sp("I",2), flag("suspects_intake"),
+        logIt("You told Robin the pressure drop is upstream at the aquifer intake — not the local regulators.")) },
+    { key:"2", label:"Wave it off and steady the table — no sense letting a hiccup become a panic.",
+      to:"a_servo", effect:chain(sp("C",2), bond("robin",1),
+        logIt("Kept the mess hall calm about the water — talked the worry back down.")) },
+    { key:"3", label:"\"I'll pull the pump-room logs myself after shift. We'll know for sure.\"",
+      to:"a_servo", effect:chain(sp("E",1), sp("P",1), flag("will_check_pump"),
+        logIt("Promised Robin you'd pull the pump-room logs after shift and get a real answer.")) },
+  ]
+},
+
+a_servo:{
+  crumb:"VAULT 73 · SECTOR 2 · 09:20",
+  text:
+`Your shift board lights up before you've finished your coffee: blast door 2-C is jammed half-open, and the maintenance lift is down, so it's a walk. Overseer Wynn catches you in the corridor on her way somewhere with a thick stack of printouts and a thin, tired smile.
+
+<span class="say">"Sparks. Good. The door, when you get a moment — we can't seal Sector 2 with it gaping."</span> She hesitates, like she might say more, then doesn't. <span class="say">"...Thank you. For always saying yes."</span> And she's gone, walking fast, clutching those printouts a little too tightly.
+
+The door's a half-ton of stuck steel with a fried servo. You crouch in front of it. How you handle a stuck thing says a lot about a person, your old mentor used to say.`,
+  choices:[
+    { key:"1", label:"Brace your shoulder under the edge and muscle it back onto its track.",
+      to:"a_clinic", effect:chain(sp("S",2), logIt("Muscled the half-ton blast door back onto its track by main strength.")) },
+    { key:"2", label:"Pop the servo housing and rewire the actuator from spare parts.",
+      to:"a_clinic", effect:chain(sp("I",2), logIt("Rewired the dead door servo from spare parts — clean fix.")) },
+    { key:"3", label:"Trace the fault first — a blown servo never just blows. Find the why.",
+      to:"a_clinic", effect:chain(sp("P",2), flag("found_brownout"),
+        logIt("Traced the door fault to a power brownout — the vault's drawing too hard somewhere. Filed it away.")) },
+  ]
+},
+
+a_clinic:{
+  crumb:"VAULT 73 · CLINIC · 11:05",
+  text:
+`You're rerouting cable past the clinic when a cry pulls you in. A dweller's gone down in the waiting area — sweating, grey, breathing wrong. The clinic is hot, far too hot; the air recyclers run off the same water loop as everything else, and that loop is sick.
+
+And there, already kneeling by the fallen man with a cool cloth and steady hands, is Cass.
+
+You two have been something more than friends for a year now, careful and quiet about it the way the vault makes you be. Cass looks up, and the worry in their eyes isn't just for the patient. <span class="say">"It's the heat,"</span> they say. <span class="say">"Third one today. The recyclers can't keep up, and the doctor won't say why out loud."</span> They lower their voice so only you can hear. <span class="say">"But you know why. Don't you, Sparks."</span>`,
+  choices:[
+    { key:"1", label:"Read the man's symptoms and call the treatment before the doctor does.",
+      to:"a_cass", effect:chain(sp("I",1), sp("P",1), logIt("Diagnosed the collapsed dweller in the clinic — heat exhaustion from the failing cooling loop.")) },
+    { key:"2", label:"Take the cloth from Cass, talk the man calm, get his breathing back down.",
+      to:"a_cass", effect:chain(sp("C",2), bond("cass",1), logIt("Calmed the collapsing dweller while Cass worked — the two of you move well together.")) },
+    { key:"3", label:"Scoop him up and rush him to a cot under the one working vent.",
+      to:"a_cass", effect:chain(sp("S",1), sp("A",1), logIt("Carried the fainting dweller to the only cool cot in the clinic.")) },
+  ]
+},
+
+
+a_cass:{
+  crumb:"VAULT 73 · HYDROPONICS · 13:30",
+  text:
+`The crisis passes; the man will be fine. Cass catches your sleeve and pulls you into the hydroponics bay, where the grow-lights make a private little dusk among the bean rows. For a moment it's just the two of you and the green smell and the hum.
+
+<span class="say">"Tell me the truth,"</span> Cass says quietly. <span class="say">"Not the version you tell the mess hall. The water. How bad."</span>
+
+You tell them what your gut already knows: the intake's failing, the pump's straining, and the vault has been quietly drinking its own reserves for weeks. Cass takes it in without flinching — they've held dying hands, they don't flinch — but their fingers find yours and hold on.
+
+<span class="say">"You know what I think about, when I can't sleep?"</span> they murmur. <span class="say">"The sky. The real one. They painted a fake one on the cafeteria ceiling and called it a kindness, but I want to stand under the true one with you, just once, before I'm old."</span> They almost laugh. <span class="say">"Stupid, right? Wanting the one thing the door's there to keep out."</span>`,
+  choices:[
+    { key:"1", label:"\"It's not stupid. Promise me — if the door ever opens, we see it together.\"",
+      to:"a_pump", effect:chain(sp("C",2), bond("cass",2), flag("sky_promise"),
+        logIt("Promised Cass that if the vault door ever opened, you'd see the real sky together.")) },
+    { key:"2", label:"Say nothing. Just hold on, and let them feel you mean to fix this.",
+      to:"a_pump", effect:chain(sp("E",1), bond("cass",2),
+        logIt("Held Cass in the grow-lights and let your steadiness say what words couldn't.")) },
+    { key:"3", label:"\"Then we get the water back, and we live long enough to get old. I'll see to it.\"",
+      to:"a_pump", effect:chain(sp("L",1), sp("C",1), bond("cass",1),
+        logIt("Swore to Cass you'd fix the water and the two of you would live to grow old. You believe it. Mostly.")) },
+  ]
+},
+
+a_pump:{
+  crumb:"VAULT 73 · RECLAMATION LEVEL · 15:48",
+  text:
+`The alarm finds you in the corridor — not the soft chime of a fault, but the deep, full-throated klaxon the vault was built to dread. The aquifer alarm. In two hundred and seven years it has never once sounded for real.
+
+You're the first tech to the reclamation level, and Wynn is right behind you, all her printouts forgotten. The great pump — the iron heart of Vault 73 — is shuddering in its housing, and when you crack the regulator panel, you already know what you'll find.
+
+The reclamation regulator is slag. Ceramic seals gone, the housing scorched black, the part that turns a mile of dead rock into clean water cooked beyond any fixing you can do with spares and a wrench. The brownout that fried the door, the heat in the clinic, the spitty showers — all of it was this, coming.
+
+Wynn stares at the ruined part in your hands. <span class="say">"...Can you fix it,"</span> she says. It isn't really a question. You're the best she has, and you both already know the answer.`,
+  choices:[
+    { key:"1", label:"\"Not with anything in this vault. The seals are a pre-war RobCo part. We don't have one. Nobody made spares.\"",
+      to:"a_assembly", effect:chain(sp("I",2), flag("knows_part"),
+        logIt("Confirmed it at the source: the reclamation regulator is dead and unfixable. The vault has no spare. It never did.")) },
+    { key:"2", label:"Check everything twice before you say the words that end the world she knew.",
+      to:"a_assembly", effect:chain(sp("P",2), flag("knows_part"),
+        logIt("Triple-checked the dead pump before delivering the verdict to Wynn. No mistake. It's gone.")) },
+  ]
+},
+
+a_assembly:{
+  crumb:"VAULT 73 · ATRIUM · 19:00",
+  text:
+`Wynn calls the whole vault to the atrium, under the painted sky, around the dry stone fountain where children used to throw caps for luck. Two hundred faces. You find the three that matter: Robin near the front with their arms crossed too tight; Cass against the wall, already looking at you; Sam, small in the crowd, holding someone's hand and watching you because you're the one who fixes things.
+
+Wynn doesn't soften it. The pump is dead. The part can't be made down here. Rationing begins tonight, and even at half a cup a day, the reserves give the vault ninety days. Then nothing.
+
+The atrium erupts — fear, anger, somebody crying, somebody shouting that the door has to stay shut, it's always stayed shut, the door is the only law that's kept them alive. And Wynn, over the noise, says the thing nobody wants to be true: <span class="say">"There is a town out there. There is pre-war tech out there. If even one of us can reach it and bring back a regulator — we live. If no one goes, in ninety days, none of us do."</span>
+
+The atrium goes very quiet. Everyone understands what she's asking. Almost no one will meet her eyes.`,
+  choices:[
+    { key:"1", label:"Step up onto the fountain rim and steady the room before panic does worse than thirst.",
+      to:"a_decision", effect:chain(sp("C",2), flag("calmed_atrium"),
+        logIt("Climbed the dry fountain and steadied two hundred terrified people when the vault learned the truth.")) },
+    { key:"2", label:"Hold your ground and your nerve while the fear washes over the crowd. Think it through.",
+      to:"a_decision", effect:chain(sp("E",2), logIt("Kept your nerve in the panicking atrium and thought the problem through to its only answer.")) },
+    { key:"3", label:"Watch the three faces that matter — Robin, Cass, Sam — and let that decide you.",
+      to:"a_decision", effect:chain(sp("P",1), bond("robin",1), bond("cass",1), bond("sam",1),
+        logIt("In the panic, you watched the only three faces that mattered — and knew what you had to do.")) },
+  ]
+},
+
+a_decision:{
+  crumb:"VAULT 73 · ATRIUM · 19:20",
+  text:
+`You already know it's you. You knew it before Wynn called the assembly. You're the only tech who understands the pump well enough to recognize the right part when you find it; you're young enough to make the walk; and when you look at Sam's face in that crowd, the math stops being math.
+
+You say it out loud so the whole vault hears, so no one else's child has to volunteer their parent: <span class="say">"I'll go."</span>
+
+The silence breaks differently this time — not panic, but the terrible relief of two hundred people who get to keep being afraid for someone else instead of themselves. Wynn closes her eyes a moment. Robin shoulders to the front, jaw working. Cass hasn't moved from the wall, but their hand is pressed flat over their mouth. And Sam has gone utterly, frighteningly still.
+
+Why you, when it comes down to it — what do you carry out that door?`,
+  choices:[
+    { key:"1", label:"Because they're yours to protect. All of them. That's just what you do.",
+      to:"a_goodbye", effect:chain(sp("E",1), sp("S",1), flag("motive_protect"),
+        logIt("You volunteered to walk the wasteland to protect your people. Resolve set.")) },
+    { key:"2", label:"Because you made Cass a promise about the sky — and you keep your promises.",
+      to:"a_goodbye", effect:chain(sp("C",1), sp("L",1), bond("cass",1), flag("motive_promise"),
+        logIt("You volunteered, in part, to keep a promise to Cass about seeing the real sky together.")) },
+    { key:"3", label:"Because Sam still believes you can fix anything — and you refuse to be the one who proves them wrong.",
+      to:"a_goodbye", effect:chain(sp("E",1), bond("sam",2), flag("motive_sam"),
+        logIt("You volunteered so Sam never learns there's a thing their sibling couldn't fix.")) },
+  ]
+},
+
+
+a_goodbye:{
+  crumb:"VAULT 73 · THE DOOR · 21:40",
+  text:
+`They don't let you go empty-handed, and they don't let you go alone to the threshold. The vault gathers what it can spare, but the three who matter come with their own gifts, in the corridor before the door.
+
+Robin gets to you first, shoving something heavy and wrapped into your chest. <span class="say">"Lifted it from the security locker. Don't tell Wynn."</span> It's a 10mm pistol and a box of rounds. Their grin is doing a lot of work to hold their face together. <span class="say">"You come back, Sparks. You come back, or I'm coming out there to drag you home and I will complain the entire way."</span>
+
+Cass presses a doctor's bundle into your hands — stimpaks, a bag of RadAway, everything the clinic could justify losing — and then, quieter, a cracked photo of the two of you under the grow-lights. <span class="say">"So you remember what you're walking back to,"</span> they whisper. They don't say the promise out loud. They don't have to.
+
+And Sam. Sam steps up last, very brave and very small, and folds something into your palm: a scuffed bottle cap, their lucky one, the one they fished out of the dry fountain years ago. <span class="say">"It's the luckiest thing I have,"</span> Sam says, voice wobbling. <span class="say">"So you have to bring it back. You have to. That's the rule."</span>`,
+  effect:chain(
+    arm("pistol10mm"), give("ammo10mm",24),
+    give("stimpak",3), give("radaway",1), give("cass_locket",1),
+    give("sams_cap",1), sp("L",1),
+    bond("robin",2), bond("cass",2), bond("sam",2),
+    logIt("Robin gave you a 10mm and rounds. Cass gave you stimpaks, RadAway, and a photo. Sam gave you their lucky cap — on the condition you bring it home.")),
+  choices:[
+    { key:"1", label:"Hold all three of them one last time, and let go.", to:"pipboy_boot" },
+  ]
+},
+
+pipboy_boot:{
+  crumb:"VAULT 73 · THE DOOR · 21:55",
+  text:()=>{
+    const t=deriveTitle();
+    return `Last of all, Overseer Wynn. She fits a Pip-Boy 3000 onto your wrist — scratched, warm, older than anyone living — and a small issue pack onto your shoulders, and counts forty caps from the vault's pre-war stash into your hand. <span class="say">"It's not much of a fortune. Out there, they say it buys bread and bullets. Make it last."</span>
+
+The Pip-Boy boots with a sweep of green light, syncs to your vitals, and reads back the shape of you — not a job they assigned, but the sum of a life lived in these halls and one long, ordinary day:
+
+<span class="ok">S.P.E.C.I.A.L.  ${specialLine()}</span>
+<span class="ok">The vault knew you as Sparks. The wasteland will come to know you as ${t}.</span>
+
+Wynn holds your gaze. <span class="say">"You were the best of us at the small repairs,"</span> she says. <span class="say">"Now go fix the biggest one. Find the regulator. And Sparks — come home. That's not an order. It's the only thing I've got left to ask."</span>
+
+<span class="ok">[ Your Pip-Boy is online — tap ▸ PIP-BOY to view STAT, your pack (INV), and your journal & the people you carry (DATA). ]</span>`;
+  },
+  effect:chain(
+    wear("vaultsuit"), give("vault_wrench",1), setPack("vault_field_pack"), caps(40),
+    flag("hasPipboy"),
+    ()=>{ document.getElementById("pipOpen").disabled=false; },
+    ()=>toast("PIP-BOY 3000 · ONLINE"),
+    logIt("Overseer Wynn issued your Pip-Boy 3000, a field pack, and 40 caps. The long walk begins.")),
+  choices:[
+    { key:"1", label:"Turn and face the door.", to:"door" },
+  ]
+},
+
+door:{
+  crumb:"VAULT 73 · THE DOOR · 22:00",
+  text:
+`You walk to the end of the hall, where the enormous numbered gear waits. Nobody alive has seen it open. Behind you, two hundred people hold their breath; three of them hold something more than that.
+
+Wynn nods to the control booth. The release klaxon sounds. Pistons the size of your leg drive into the rock, and the great door shrieks against two centuries of dust and rolls aside — and for the first time in your life, you feel wind that no machine made, smell air no recycler cleaned.
+
+The tunnel beyond climbs toward a coin of painful white light. Sam is crying somewhere behind you. Cass is not, by what must be an act of enormous will. Robin says, far too loudly, <span class="say">"See you soon, Sparks,"</span> and it almost sounds like a fact.
+
+You step toward the light, and the only world you've ever known stays behind you, counting days.`,
+  choices:[
+    { key:"1", label:"Walk up the tunnel, into the sky.", to:"threshold" },
+  ]
+},
+
+/* -------- THRESHOLD -------- */
+threshold:{
+  crumb:"THE SALTPAN · VAULT 73 ENTRANCE",
+  text:
+`The world is enormous. That's the first thing — there is no ceiling, and the sky goes up forever, the color of a bruise healing. You stand blinking in the mouth of a collapsed parking structure while a hot wind drags grit across cracked solar panels. Cass should be here for this. You press a hand to the photo in your pack and keep walking.
+
+The Saltpan stretches below: a white salt flat shimmering to the horizon, broken by the bones of a highway and, far off, a thread of green where something still grows.
+
+Just inside the tunnel mouth, slumped against the wall, is a skeleton in the rotted remains of a Vault 73 jumpsuit — someone who walked out this same door, long ago, and got no farther. A folded note is tucked into the rib cage. There's a stimpak still clipped to the belt, and the dull shape of a tire iron in the dust.
+
+<span class="ok">[ Your field pack holds 6 slots. Heads up — you may not have room for everything. Open ▸ PIP-BOY (INV) to manage your load. ]</span>`,
+  loot:[
+    { id:"thresh_stim", item:"stimpak", label:"Take the stimpak clipped to the belt." },
+    { id:"tireiron_pickup", item:"tire_iron", label:"Take the tire iron (a backup melee weapon)." },
+  ],
+  choices:[
+    { key:"r", label:"Read the folded note.", to:"note" },
+    { key:"g", label:"Leave the bones in peace and step into the Saltpan.", to:"saltpan" },
+  ]
+},
+
+note:{
+  crumb:"THE SALTPAN · A NOTE",
+  text:
+`The paper is brittle as a moth's wing. The hand is shaky, hurried:
+
+<span class="say">"To whoever Wynn sends next — and she will. The pump dies, she sends someone, that's the pattern. I was the someone before you. I didn't make it past the door; the rads up here were worse then. Listen: don't trust the salt. It's beautiful and it'll cook the water right out of you. Make for the green line west — there's a town, Drywell, built on the only good aquifer for fifty miles. The water-boss there is hard but fair. And whatever you do, keep your bag. Out here, what you can carry is who you are. — Sleeper 14, Vault 73."</span>
+
+You fold the note away. Two hundred years of dwellers walking out this door, one at a time. You intend to be the one who walks back in.`,
+  effect:chain(flag("readNote"), logIt("A note from <b>Sleeper 14</b> points west to <b>Drywell</b> and its aquifer.")),
+  choices:[
+    { key:"1", label:"Step into the Saltpan and head west.", to:"saltpan" },
+  ]
+},
+
+/* -------- FIRST NPC: MARIEL (dialogue heavy) -------- */
+saltpan:{
+  crumb:"THE SALTPAN · OPEN FLAT",
+  text:
+`You walk into the white. The salt crunches like old snow, and the heat lies on you like a hand. Your Pip-Boy's geiger counter ticks lazily — survivable, for now.
+
+You're maybe an hour out when you see the other person: a lean woman in a dust-wrapped trail coat leading a two-headed brahmin laden with scrap. She sees you a heartbeat later, and her hand drifts toward the rifle slung at her back — then stops, because she's looking at your jumpsuit and the great blue 73 across your shoulders, and her face does something complicated.
+
+<span class="say">"Huh,"</span> she says, when you're close enough. <span class="say">"A vaultie. A real, actual, factory-fresh vaultie. Thought you people were a campfire story."</span> The brahmin lows at you with both heads. <span class="say">"Name's Mariel. You're either very lost or very new. Which is it?"</span>`,
+  choices:[
+    { key:"1", label:"\"New. The door opened this morning. I have questions.\"", to:"mariel_talk" },
+    { key:"2", label:"[PER 6] You notice she's favoring one leg, and the blood on her coat.",
+      to:"mariel_wound", check:{stat:"P",dc:6} },
+    { key:"3", label:"\"Stay back. I don't know you.\" (Hand on your weapon.)", to:"mariel_wary" },
+  ]
+},
+
+mariel_wound:{
+  crumb:"THE SALTPAN · MARIEL",
+  text:
+`You keep your tone easy, but your eyes go to the dark stain spreading along her left thigh, and the careful way she's holding her weight.
+
+<span class="say">"You're hurt,"</span> you say.
+
+Mariel's eyebrows go up. <span class="say">"...Sharp eye for a tin-can tourist."</span> She exhales, and some of the wariness goes out of her with it. <span class="say">"Raiders. Rust-runners, two ridges back. Caught me a graze and most of my caravan. I'm the part that got away."</span> She studies you with new interest. <span class="say">"You that observant about everything, or just bleeding strangers?"</span>`,
+  effect:flag("mariel_trust"),
+  choices:[
+    { key:"1", label:"Offer her a Stimpak.", to:"mariel_heal", need:{item:"stimpak"},
+      lockedLabel:"Offer her a Stimpak you don't have." },
+    { key:"2", label:"\"Just you. Tell me where I am, and I'll watch your back to town.\"", to:"mariel_talk" },
+  ]
+},
+
+mariel_heal:{
+  crumb:"THE SALTPAN · MARIEL",
+  text:
+`You dig a Stimpak from your bag and hold it out. <span class="say">"Here. For the leg."</span>
+
+Mariel stares at it like you've offered her a fistful of pre-war gold — which, out here, is roughly the trade. Then she takes it, jabs it into her thigh with practiced violence, and lets out a long breath as the bleeding stops.
+
+<span class="say">"Okay,"</span> she says quietly. <span class="say">"Okay. A vaultie who gives away stims to strangers. The wasteland's gonna eat you alive, friend — unless somebody decent gets to you first."</span> She straightens, testing the leg. <span class="say">"Tell you what. You're going to Drywell, I can tell. Everybody's going to Drywell. Walk with me, and I'll make sure you get there in one piece — and I'll trade you up to a real pack. That field pack of yours won't hold a day's salvage."</span>`,
+  effect:chain(()=>removeItem("stimpak",1), flag("mariel_ally"),
+    logIt("Healed <b>Mariel</b>, a caravan scout. She's offered to guide you to Drywell and trade you a better pack.")),
+  choices:[
+    { key:"1", label:"\"A better pack? Let's see it.\"", to:"mariel_pack" },
+  ]
+},
+
+mariel_pack:{
+  crumb:"THE SALTPAN · MARIEL",
+  text:
+`Mariel unstraps a frame rucksack from the brahmin's load and tosses it to you. <span class="say">"Trail rucksack. Twelve slots, good harness, only smells a little like brahmin. It's yours — call it a finder's fee for the leg."</span> She nods at your field pack. <span class="say">"Move your kit over. Leave the little vault bag, somebody'll want it."</span>
+
+You transfer everything across. The rucksack rides higher and easier; suddenly the wasteland feels a fraction less like it's trying to strip you bare.`,
+  effect:chain(setPack("rucksack"), flag("hasRuck"), logIt("Mariel gave you a <b>Trail Rucksack</b> (12 slots)."), ()=>toast("UPGRADED · TRAIL RUCKSACK")),
+  choices:[
+    { key:"1", label:"\"Thank you. Now — where exactly am I?\"", to:"mariel_talk" },
+  ]
+},
+
+mariel_wary:{
+  crumb:"THE SALTPAN · MARIEL",
+  text:
+`Your hand settles on your weapon. Mariel notices, and the warmth drains from her face like water through salt.
+
+<span class="say">"Easy, vaultie,"</span> she says flatly, backing her brahmin up a step. <span class="say">"I've put down three things today already and I'd rather you not be the fourth. You want to be jumpy? Fine. Be jumpy somewhere else."</span>
+
+She gives you a wide berth, eyeing you the whole way, and points west with her chin before she goes. <span class="say">"Town's that way. Drywell. They don't much like people who draw on strangers, so practice your manners before you get there."</span> Then she's gone, swallowed by the heat-shimmer, and you've learned your first lesson of the surface: trust is the only currency that buys trust.`,
+  effect:logIt("Spooked <b>Mariel</b>, a caravan scout. She pointed you to Drywell and left."),
+  choices:[
+    { key:"1", label:"Head west toward Drywell, alone.", to:"crank" },
+  ]
+},
+
+mariel_talk:{
+  crumb:"THE SALTPAN · MARIEL",
+  text:
+`<span class="say">"Where you are,"</span> Mariel repeats, almost gently. <span class="say">"You're in the Saltpan, edge of the Mojave, year of somebody's lord two-eighty-four. The old world ended a couple centuries back — bombs, the long winter, all of it. What's left is us, scratching a living off the bones."</span>
+
+She points west, to that distant thread of green. <span class="say">"Drywell's that way. Only working aquifer for fifty miles, which makes the water-boss there the closest thing to a king the Saltpan's got. NCR flag flies over the gate but everybody knows it's Saul Drywell who runs the taps. If your Vault needs water-tech, Drywell's where the wasteland keeps its smart people — Brotherhood scribes, traders, a doctor who talks to ghosts. Start there."</span>
+
+She squints at you. <span class="say">"What's a vaultie need bad enough to walk out a sealed door for, anyhow?"</span>`,
+  choices:[
+    { key:"1", label:"[CHA 6] Tell her the truth and ask her to vouch for you in Drywell.",
+      to:"mariel_vouch", check:{stat:"C",dc:6} },
+    { key:"2", label:"[INT 6] \"Our aquifer pump's failed. I need a reclamation regulator or an engineer.\"",
+      to:"mariel_tech", check:{stat:"I",dc:6} },
+    { key:"3", label:"\"Just passing through. Thanks for the directions.\"", to:"crank" },
+  ]
+},
+
+mariel_vouch:{
+  crumb:"THE SALTPAN · MARIEL",
+  text:
+`You tell her straight: two hundred souls, ninety days of water, a dead pump and a sealed door behind you. No theatrics. Just the truth, and the weight of it.
+
+Mariel is quiet a moment. <span class="say">"Two hundred people,"</span> she says. <span class="say">"Hell."</span> She works something out behind her eyes, then nods. <span class="say">"Right. Saul Drywell doesn't trust strangers, and he trusts vaulties even less — last vault that opened near here flooded the Saltpan with crazies. But he trusts me. I run scrap for him."</span>
+
+She pulls a brass token from her coat and presses it into your palm. <span class="say">"Show him this at the gate. Tell Tess at the bar that Mariel sent you and you're good for it. That buys you a hearing, not a miracle. The rest is on you and that silver tongue."</span>`,
+  effect:chain(flag("mariel_token"), give("nukacola",1),
+    logIt("<b>Mariel</b> gave you her brass token — show it to Saul Drywell to earn a hearing.")),
+  choices:[
+    { key:"1", label:"Pocket the token and head for Drywell.", to:"crank" },
+  ]
+},
+
+mariel_tech:{
+  crumb:"THE SALTPAN · MARIEL",
+  text:
+`<span class="say">"A reclamation regulator,"</span> you say. <span class="say">"Pre-war RobCo part, or a scribe who can fabricate one. Without it, two hundred people in my Vault die of thirst inside three months."</span>
+
+Mariel blinks. <span class="say">"You actually know what's broken. That's rarer than the part, believe me."</span> She rubs her jaw. <span class="say">"RobCo water-tech... there's a Brotherhood scribe holed up in Drywell, name of Aldous, collects exactly that kind of junk. He won't give you anything — Brotherhood never does — but he'll know where one is. And the Brotherhood loves a vault that still has working pre-war tech inside it. You've got something to trade he can't resist: a peek at your home."</span>
+
+She looks almost impressed. <span class="say">"Lead with that, with Aldous. Not the sob story — the tech."</span>`,
+  effect:chain(flag("knows_aldous"),
+    logIt("Learned of <b>Scribe Aldous</b> in Drywell — Brotherhood, hoards water-tech, will deal for a look at Vault 73.")),
+  choices:[
+    { key:"1", label:"\"I'll find Aldous. Thank you, Mariel.\"", to:"crank" },
+  ]
+},
+
+/* -------- THE GHOUL: CRANK (dialogue/lore) -------- */
+crank:{
+  crumb:"THE SALTPAN · OLD HIGHWAY",
+  text:
+`The salt gives way to the cracked spine of an old highway, and the green line resolves into distant scrub. As the sun drops, you find a small fire burning under a collapsed overpass — and beside it, a figure that makes your Pip-Boy tick faster.
+
+He's a ghoul: skin like cracked leather over a skull, no nose to speak of, eyes a milky gold. Two centuries of radiation have eaten most of what he was, but not the man behind it. He's roasting something on a wire and doesn't reach for the hunting rifle leaning beside him.
+
+<span class="say">"Sit if you're sitting,"</span> he rasps without looking up. <span class="say">"Don't shoot if you're not shooting. I'm too old to do either standing."</span> A milky eye rolls toward your jumpsuit. <span class="say">"Vault 73. Knew a girl from 73 once, back when the lights were new. You lot still keeping the fountain in the atrium?"</span>`,
+  choices:[
+    { key:"1", label:"\"You remember the Vault? How old ARE you?\"", to:"crank_old" },
+    { key:"2", label:"[INT 7] Ask him what he knows about pre-war water reclamation tech.",
+      to:"crank_tech", check:{stat:"I",dc:7} },
+    { key:"3", label:"[CHA 5] Share your fire and your story, traveler to traveler.",
+      to:"crank_share", check:{stat:"C",dc:5} },
+    { key:"4", label:"\"I should keep moving before dark.\"", to:"chokepoint" },
+  ]
+},
+
+crank_old:{
+  crumb:"THE SALTPAN · OLD CRANK",
+  text:
+`The ghoul wheezes a laugh that turns into a cough. <span class="say">"Old enough to have paid taxes to a country nobody remembers. Name's Crank — used to be a longer name, but the years sanded it down."</span> He turns the wire over the flame. <span class="say">"I was a lineman. Strung the power out to your Vault before they sealed it, matter of fact. Then the bombs fell, and I caught a lifetime of rads instead of a quick death, and here I still am. Lucky me."</span>
+
+He says it without much bitterness. Just fact, the way the wasteland deals in facts.
+
+<span class="say">"You're walking to Drywell. Everyone is. Word of advice from a dead man who won't stay dead: there's a raider checkpoint where this highway pinches through the rocks, mile ahead. The Rust-runners. They tax the road in caps, cargo, or blood, and they're not particular which."</span>`,
+  effect:chain(flag("warned_raiders"), logIt("<b>Crank</b>, an old ghoul lineman, warned of a Rust-runner checkpoint ahead on the highway.")),
+  choices:[
+    { key:"1", label:"[CHA 5] \"Anything I can do to get past them without a fight?\"",
+      to:"crank_share", check:{stat:"C",dc:5} },
+    { key:"2", label:"\"Thanks for the warning. I'll handle it.\"", to:"chokepoint" },
+  ]
+},
+
+crank_tech:{
+  crumb:"THE SALTPAN · OLD CRANK",
+  text:
+`You crouch by the fire and ask him plainly about reclamation regulators — flow rates, the RobCo aquifer schematics, the failure modes of a two-century-old pump.
+
+Crank's milky eyes sharpen. <span class="say">"Now that's a question with some meat on it. Most folk out here can't spell 'aquifer,' let alone fix one."</span> He scratches at his jaw with a leathery finger. <span class="say">"Your regulator — RobCo Hydraulics, model line they used in all the deep Vaults. They went bad in batches; the ceramic seals were garbage. You won't scavenge a good one off the salt. But the Brotherhood's been pulling them out of a flooded RobCo facility east of Drywell for years. Scribe in town, Aldous, has a whole crate of 'em. Question is what he wants in trade."</span>
+
+He fishes two tablets from a tin and flicks them to you. <span class="say">"Rad-X. Facility's hot as a reactor's lunch. You'll want these if you ever go digging there yourself."</span>`,
+  effect:chain(flag("knows_aldous"), flag("knows_facility"), give("radx",2),
+    logIt("<b>Crank</b> confirmed the regulator is RobCo Hydraulics; <b>Scribe Aldous</b> in Drywell has a crate from a flooded RobCo facility to the east.")),
+  choices:[
+    { key:"1", label:"Take the Rad-X and move on toward the checkpoint.", to:"chokepoint" },
+  ]
+},
+
+crank_share:{
+  crumb:"THE SALTPAN · OLD CRANK",
+  text:
+`You sit, and you talk. You tell him about the alarm, the dry fountain, Wynn's tired eyes, the door opening onto a world too big to hold in your head. Crank listens the way only the very old can — without hurry, without judgment.
+
+<span class="say">"First day out of the dark,"</span> he murmurs. <span class="say">"I remember mine. Worst and best day of a long, long life."</span> He pulls the wire off the fire and offers you half of whatever it is. It's mole rat, and it's the best thing you've ever eaten, which tells you something about Vault food.
+
+<span class="say">"For the road,"</span> he says, and presses a bottle of clean water and a tip into your hands. <span class="say">"Those Rust-runners at the pinch — their boss is a coward who plays at being a king. He respects two things: a full purse and a steady spine. Don't run, don't beg. Stand square, look bored, and offer him a toll he can save face taking. Costs you a few caps. Beats costing you your blood."</span>`,
+  effect:chain(flag("crank_advice"), give("purified_water",1), heal(6),
+    logIt("Shared a meal with <b>Crank</b>. His tip: the Rust-runner boss respects a steady spine — offer a face-saving toll, don't beg.")),
+  choices:[
+    { key:"1", label:"Thank him and walk on to the checkpoint.", to:"chokepoint" },
+  ]
+},
+
+/* -------- RAIDER CHOKEPOINT (multi-resolution, dialogue-forward) -------- */
+chokepoint:{
+  crumb:"THE SALTPAN · THE PINCH",
+  text:
+`The highway funnels into a slot between two leaning rock walls, and the Rust-runners have made it theirs. A barricade of welded car-doors blocks the road. Spray-painted across it, a crude crown dripping rust-red.
+
+Three of them lounge in the shade, and a fourth — broad, scarred, wearing a road-sign as a breastplate — pushes off the rock and saunders into your path with the bored swagger of a man who's done this a thousand times.
+
+<span class="say">"Road's closed, traveler,"</span> he drawls, <span class="say">"less you pay the Rust toll. Caps, cargo, or a pint of you — King's choice, and I'm feeling thirsty."</span> Behind him, a woman racks a pipe rifle, slow and theatrical. <span class="say">"So. What've you got for your king today?"</span>`,
+  choices:[
+    { key:"1", label:"[CHA 7] Talk past him — offer a small, face-saving toll.",
+      to:"choke_talk", check:{stat:"C",dc:7} },
+    { key:"2", label:"[STR 6] Stand square and stare him down. \"Try it.\"",
+      to:"choke_intimidate", check:{stat:"S",dc:6} },
+    { key:"3", label:"Pay the toll in caps. (25 caps)", to:"choke_pay", need:{caps:25},
+      lockedLabel:"Pay the toll — you're short on caps." },
+    { key:"4", label:"[AGI 6] Slip off the road and sneak past through the rocks.",
+      to:"choke_sneak", check:{stat:"A",dc:6} },
+    { key:"5", label:"Draw your weapon and fight your way through.",
+      to:()=>hasUsableWeapon()?"choke_win":"choke_loss" },
+  ]
+},
+
+choke_talk:{
+  crumb:"THE PINCH · TOLL PAID IN WORDS",
+  text:
+`You don't reach for caps and you don't reach for a weapon. You smile, like a man greeting a colleague.
+
+<span class="say">"A king deserves tribute,"</span> you say, easy as anything, and flip him a handful of caps before he can name a price — just enough to look generous, little enough to keep. <span class="say">"For the crown. We're square, your majesty. I'll tell the road the Rust toll's fair and the King's a reasonable man."</span>
+
+The big raider catches the caps, and you watch him weigh the math: a fight, or a story that makes him sound like the wise lord he pretends to be. Vanity wins, the way Crank said it would.
+
+<span class="say">"...Damn right I'm reasonable,"</span> he announces to his crew, pocketing the caps. <span class="say">"Road's yours, traveler. Tell 'em the King let you pass."</span> He waves the barricade open. You walk through it with your spine straight and your skin intact.`,
+  effect:chain(caps(-15), flag("passed_choke"), logIt("Talked past the <b>Rust-runner</b> checkpoint with a face-saving toll.")),
+  choices:[ { key:"1", label:"Continue down the highway to Drywell.", to:"drywell" } ]
+},
+
+choke_intimidate:{
+  crumb:"THE PINCH · STAREDOWN",
+  text:
+`You don't move, don't blink, don't reach for anything. You let your shoulders settle and you look at him like he's a chore.
+
+<span class="say">"Try it,"</span> you say, and let the silence do the rest.
+
+It's not the words. It's that you mean them. The big raider's grin flickers. He'd planned on a frightened traveler, and instead he's got a wall in a Vault suit who looks like he's killed before and found it dull. His crew shifts. A leader who picks a fight he might lose stops being a leader.
+
+<span class="say">"...Ahh, you're not worth the bullets,"</span> he says finally, too loud, covering. <span class="say">"Get gone. Road's free today. King's mercy."</span> He spits and turns away. You walk through the gap slow enough to make the point, and not one of them meets your eyes.`,
+  effect:chain(flag("passed_choke"), logIt("Stared down the <b>Rust-runner</b> boss and walked through untouched.")),
+  choices:[ { key:"1", label:"Continue down the highway to Drywell.", to:"drywell" } ]
+},
+
+choke_pay:{
+  crumb:"THE PINCH · TOLL PAID",
+  text:
+`You count out the caps into his waiting palm. He grins, gold and gaps, and makes a show of counting them twice.
+
+<span class="say">"Pleasure doing business,"</span> he says, and waves the barricade aside. It stings to hand over a fifth of your purse to a man wearing a road-sign, but caps spend better than blood, and you've kept all of yours.
+
+You walk through. Behind you, the King is already telling his crew it was a hundred caps, not twenty-five.`,
+  effect:chain(caps(-25), flag("passed_choke"), logIt("Paid the <b>Rust-runner</b> toll (25 caps) to pass the checkpoint.")),
+  choices:[ { key:"1", label:"Continue down the highway to Drywell.", to:"drywell" } ]
+},
+
+choke_sneak:{
+  crumb:"THE PINCH · OFF THE ROAD",
+  text:
+`You drift back into the rocks before the King finishes his speech, and the wasteland teaches you its kindest skill: being somewhere else.
+
+You climb the slope on the soft outer edges of your boots, freeze when a guard glances over, move when the wind covers the sound. The raiders are watching the road, not the ridge — guarding a door while you climb through the window. It takes twenty patient minutes and one held breath when a stone rolls, but you come down on the far side of the barricade with the checkpoint at your back and the King still waiting to tax a traveler who isn't coming.`,
+  effect:chain(flag("passed_choke"), logIt("Sneaked around the <b>Rust-runner</b> checkpoint through the rocks.")),
+  choices:[ { key:"1", label:"Continue down the highway to Drywell.", to:"drywell" } ]
+},
+
+choke_win:{
+  crumb:"THE PINCH · THE HARD WAY",
+  text:()=>`You draw, and the slot canyon turns to noise.
+
+It's fast and ugly. ${state.equippedWeapon&&ITEMS[state.equippedWeapon].kind==="gun"?"Your gun barks and the King's road-sign breastplate proves it's only a road sign.":"You're inside their reach before the pipe rifle swings up, and your weapon does its blunt, decisive work."} Two go down, the woman drops her rifle and runs, and the King — all swagger gone — scrambles back through his own barricade hollering for a truce.
+
+You're bleeding from a graze across the ribs and your ears are ringing, but the road is yours.`,
+  effect:()=>{
+    hurt(28)(); flag("passed_choke")();
+    if(state.equippedWeapon&&ITEMS[state.equippedWeapon].kind==="gun") removeItem(ITEMS[state.equippedWeapon].ammo,4);
+    addItem("ammo556",6); state.caps+=18;
+    logIt("Fought through the <b>Rust-runner</b> checkpoint. Bloodied but victorious; scavenged ammo and caps.")();
+  },
+  loot:[
+    { id:"raider_rifle", item:"pipe_rifle", label:"Take the King's dropped pipe rifle." },
+  ],
+  choices:[
+    { key:"1", label:"Patch up and limp on to Drywell.", to:"drywell" },
+  ]
+},
+
+choke_loss:{
+  crumb:"THE PINCH · THE HARD WAY",
+  text:`You reach for a weapon you can't really swing, and the Rust-runners see it for the bluff it is.
+
+The pipe rifle barks first. The world goes white, then red. You go down hard in the salt, and the King's boot rolls you over while his crew laughs.
+
+<span class="bad">You wake an hour later, alive but robbed — they took your caps and a fistful of your kit, and left you for the buzzards.</span> Lesson learned: don't pull steel you can't back up.`,
+  effect:()=>{
+    hurt(42)(); flag("passed_choke")();
+    state.caps=0; removeItem("stimpak",1); removeItem("nukacola",1);
+    logIt("Tried to fight the <b>Rust-runners</b> underarmed and got beaten and robbed.")();
+  },
+  choices:[
+    { key:"1", label:"Patch up and limp on to Drywell.", to:"drywell" },
+  ]
+},
+
+/* -------- DRYWELL (hub: dialogue, vendor pack/weapons, quest, endings) -------- */
+drywell:{
+  crumb:"DRYWELL · TOWN GATE",
+  text:
+`The green line was true: Drywell is a real town, walled in stacked car-husks and corrugated steel, built in a tight ring around a hand-pump well that actually, miraculously, gives water. A faded NCR flag snaps over the gate, but everyone moving through it answers to the broad man on the well platform who watches the whole town like a hawk watches a field.
+
+A gate guard with a tired face and a hunting rifle looks you up and down — Vault suit, Pip-Boy, no obvious malice. <span class="say">"Huh. A vaultie. Don't get many of those that aren't trouble."</span> She thumbs over her shoulder. <span class="say">"Bar's the building with the lantern. Trader's the one with the junk piled out front. And if you've got business with the boss — that's Saul Drywell, up on the well — you go through Tess at the bar first. Nobody talks to Saul cold."</span>`,
+  effect:flag("at_drywell"),
+  choices:[
+    { key:"1", label:"Go to the bar and find Tess.", to:"bar" },
+    { key:"2", label:"Visit the trader's stall first.", to:"trader" },
+    { key:"3", label:"[INT 6] Ask the guard about a Brotherhood scribe named Aldous.",
+      to:"guard_aldous", check:{stat:"I",dc:6} },
+  ]
+},
+
+guard_aldous:{
+  crumb:"DRYWELL · TOWN GATE",
+  text:
+`<span class="say">"Aldous?"</span> The guard snorts. <span class="say">"Yeah, the Brotherhood's pet scribe. Keeps to the old water-tower on the east wall, surrounded by more humming junk than the rest of us own put together. Tin-can fanatics, the Brotherhood — they'd let you die of thirst standing on a working purifier if it meant keeping the 'technology' out of dirty hands."</span>
+
+She shrugs. <span class="say">"That said — if it's pre-war water-tech you want, Aldous is the only game in the Saltpan. Just don't expect charity. Brotherhood deals in trade, and what they want is always tech for tech. You're a vaultie. You're walking around in exactly what he covets."</span>`,
+  effect:chain(flag("knows_aldous"), logIt("The gate guard confirmed <b>Scribe Aldous</b> is in the east water-tower and deals tech-for-tech only.")),
+  choices:[
+    { key:"1", label:"Head to the bar to find Tess.", to:"bar" },
+    { key:"2", label:"Go straight to Aldous's water-tower.", to:"aldous" },
+  ]
+},
+
+bar:{
+  crumb:"DRYWELL · THE DRY WELL SALOON",
+  text:
+`The saloon is dim and cool and smells of dust, hops, and brahmin fat. A handful of locals nurse drinks. Behind the bar, a wiry woman with grey-streaked braids and forearms like rebar polishes a glass and clocks you the instant you duck through the door.
+
+<span class="say">"Vault suit,"</span> Tess says, not unkindly. <span class="say">"Either you're here to drink, here to cause trouble, or here to see Saul. You don't look thirsty and you don't look stupid, so."</span> She sets the glass down. <span class="say">"What do you want, dweller?"</span>`,
+  choices:[
+    { key:"1", label:"Show her Mariel's token.", to:"tess_token", need:{flag:"mariel_token"},
+      hideUnless:"mariel_token" },
+    { key:"2", label:"[CHA 6] \"Two hundred people will die of thirst without your boss's help. Get me a hearing.\"",
+      to:"tess_plea", check:{stat:"C",dc:6} },
+    { key:"3", label:"\"Information. What's the price of a word with Saul Drywell?\"", to:"tess_price" },
+  ]
+},
+
+tess_token:{
+  crumb:"DRYWELL · TESS",
+  text:
+`You set Mariel's brass token on the bar. Tess picks it up, turns it over, and her whole posture changes.
+
+<span class="say">"Mariel's mark. Well, hell — why didn't you lead with that."</span> She slides it back. <span class="say">"Mariel doesn't vouch for fools or vaultie crazies, so that's you cleared the first hurdle most folk never get over. She alright? She's overdue."</span> You tell her about the raiders and the leg; Tess's jaw tightens. <span class="say">"Rust-runners. Saul keeps saying he'll deal with 'em. Anyway — you're good in here. I'll send word up to the well that you're worth ten minutes of Saul's time. Use 'em well; he doesn't give twenty."</span>`,
+  effect:chain(flag("tess_ally"), logIt("<b>Tess</b> recognized Mariel's token and will get you a hearing with Saul Drywell.")),
+  choices:[
+    { key:"1", label:"\"What does Saul actually want? Help me not waste those ten minutes.\"", to:"tess_brief" },
+  ]
+},
+
+tess_plea:{
+  crumb:"DRYWELL · TESS",
+  text:
+`You lean on the bar and lay it down with quiet weight: two hundred people, ninety days of water, a dead pump, a sealed door, and a Vault that has kept faith with the surface for two centuries by asking it for nothing — until now.
+
+Tess studies you for a long moment. The saloon has gone a little quiet.
+
+<span class="say">"...You believe every word of that,"</span> she says finally. <span class="say">"That's rarer than water, dweller. Alright. I'll get you in front of Saul. But fair warning — the man's heart pumps caps, not charity. You'll need to make thirst his problem too, or give him something he wants. Think on that before you climb that platform."</span>`,
+  effect:chain(flag("tess_ally"), logIt("Moved <b>Tess</b> with the truth; she'll arrange a hearing with Saul Drywell.")),
+  choices:[
+    { key:"1", label:"\"So what does Saul want? Brief me.\"", to:"tess_brief" },
+  ]
+},
+
+tess_price:{
+  crumb:"DRYWELL · TESS",
+  text:
+`<span class="say">"The price of a word with Saul,"</span> Tess repeats, amused. <span class="say">"Depends who's asking. For most strangers it's 'no.' For you—"</span> she taps the bar. <span class="say">"Tell you what. Saul's got a problem with the Rust-runners choking his trade road, and a bigger problem he doesn't talk about: his own well's flow is dropping. Town's scared. A vaultie who knows water-tech might be useful enough to be worth ten minutes."</span>
+
+She pours you a drink you didn't order. <span class="say">"On the house. Drink it, then go see the trader Peck — get yourself looking less like fresh meat — and I'll have word sent up to the well. Don't make me regret the drink."</span>`,
+  effect:chain(flag("tess_ally"), flag("well_failing"), heal(5),
+    logIt("<b>Tess</b> will arrange a hearing. Drywell's own well is quietly failing — Saul needs water-tech help too.")),
+  choices:[
+    { key:"1", label:"\"What should I know before I meet him?\"", to:"tess_brief" },
+  ]
+},
+
+tess_brief:{
+  crumb:"DRYWELL · TESS",
+  text:
+`Tess leans in, voice low. <span class="say">"Three things. One: Saul respects competence and despises begging — walk up there like you're doing him a favor, because you might be. Two: his well's flow is dropping and it's terrifying him, though he'd sooner eat sand than admit it in front of the town. And three—"</span>
+
+She glances at the door, then back. <span class="say">"—the Brotherhood scribe, Aldous, has a crate of RobCo water regulators he's hoarding in the east tower. Saul wants them and Aldous won't deal with him; bad blood. But Aldous might deal with a vaultie. You play this right, dweller, you don't just get your Vault its part. You broker the thing that saves this town too. Now go see Peck, then climb that platform."</span>`,
+  effect:chain(flag("knows_aldous"), flag("knows_regulators"), flag("briefed"),
+    logIt("<b>Tess'</b> brief: Aldous hoards RobCo regulators Saul desperately needs. Broker it right and you could save both Vault 73 and Drywell.")),
+  choices:[
+    { key:"1", label:"Go see Peck the trader.", to:"trader" },
+    { key:"2", label:"Go straight up to meet Saul Drywell.", to:"saul" },
+    { key:"3", label:"Go find Scribe Aldous in the east tower.", to:"aldous" },
+  ]
+},
+
+trader:{
+  crumb:"DRYWELL · PECK'S SALVAGE",
+  text:
+`Peck's stall is an avalanche of the wasteland's leftovers, presided over by a round, cheerful man with a magnifying monocle and a salesman's grin. <span class="say">"Welcome, welcome! Fresh face, fresh caps, I hope. Peck's the name, fair prices the game — well, fair-ish."</span>
+
+He spreads his hands over the wares. <span class="say">"Got a proper trail rucksack if that little vault pack's cramping you. Got hardware if the road's been unkind. Got the good stuff — water, stims, the works. What're we doing today, friend?"</span>
+
+<span class="ok">You have ${'$caps$'} caps.</span>`,
+  choices:[
+    { key:"1", label:"Buy the Trail Rucksack — 12 slots. (60 caps)", to:"buy_ruck",
+      need:{caps:60}, hideUnless_not:"hasRuck",
+      lockedLabel:"Buy the rucksack — not enough caps. (60)" },
+    { key:"2", label:"[CHA 7] Haggle Peck down on the rucksack. (40 caps)", to:"buy_ruck_cheap",
+      check:{stat:"C",dc:7}, need:{caps:40}, hideUnless_not:"hasRuck",
+      lockedLabel:"Haggle the rucksack — still short. (40)" },
+    { key:"3", label:"Buy a 10mm Pistol + 24 rounds. (75 caps)", to:"buy_pistol",
+      need:{caps:75}, lockedLabel:"Buy a 10mm pistol — not enough caps. (75)" },
+    { key:"4", label:"Buy a Reinforced Trail Jacket. (50 caps)", to:"buy_jacket",
+      need:{caps:50}, lockedLabel:"Buy the trail jacket — not enough caps. (50)" },
+    { key:"5", label:"Buy supplies: 2 Stimpaks + 2 Purified Water. (45 caps)", to:"buy_supplies",
+      need:{caps:45}, lockedLabel:"Buy supplies — not enough caps. (45)" },
+    { key:"6", label:"\"Maybe later, Peck.\" (Leave the stall.)", to:"trader_leave" },
+  ]
+},
+buy_ruck:{ crumb:"DRYWELL · PECK'S SALVAGE",
+  text:`Peck swaps you a sturdy frame rucksack for your caps. <span class="say">"Twelve slots, finest canvas in the Saltpan! Shift your kit over, leave the old bag, off you go."</span>`,
+  effect:chain(caps(-60), setPack("rucksack"), flag("hasRuck"), ()=>toast("UPGRADED · TRAIL RUCKSACK"),
+    logIt("Bought a <b>Trail Rucksack</b> from Peck (12 slots).")),
+  choices:[{ key:"1", label:"Back to the stall.", to:"trader" }] },
+buy_ruck_cheap:{ crumb:"DRYWELL · PECK'S SALVAGE",
+  text:`You poke holes in Peck's pricing until he throws up his hands, laughing. <span class="say">"Forty, forty! You're robbing me, but I like you. Take the cursed thing."</span> You move your kit over to the rucksack.`,
+  effect:chain(caps(-40), setPack("rucksack"), flag("hasRuck"), ()=>toast("UPGRADED · TRAIL RUCKSACK"),
+    logIt("Haggled a <b>Trail Rucksack</b> out of Peck for 40 caps.")),
+  choices:[{ key:"1", label:"Back to the stall.", to:"trader" }] },
+buy_pistol:{ crumb:"DRYWELL · PECK'S SALVAGE",
+  text:`Peck lays out a cleaned-up 10mm and a box of brass. <span class="say">"RobCo's finest, only dropped it twice. Loaded and yours."</span> It's been equipped to your Pip-Boy's loadout.`,
+  effect:chain(caps(-75), arm("pistol10mm"), give("ammo10mm",24), ()=>toast("EQUIPPED · 10MM PISTOL"),
+    logIt("Bought a <b>10mm Pistol</b> and 24 rounds from Peck.")),
+  choices:[{ key:"1", label:"Back to the stall.", to:"trader" }] },
+buy_jacket:{ crumb:"DRYWELL · PECK'S SALVAGE",
+  text:`Peck tosses you a heavy jacket with plates sewn into the lining. <span class="say">"Stops more than the wind, that. Caravan-grade."</span> You shrug it on over the Vault suit.`,
+  effect:chain(caps(-50), wear("reinforced_jacket"), ()=>toast("EQUIPPED · TRAIL JACKET"),
+    logIt("Bought and equipped a <b>Reinforced Trail Jacket</b> from Peck.")),
+  choices:[{ key:"1", label:"Back to the stall.", to:"trader" }] },
+buy_supplies:{ crumb:"DRYWELL · PECK'S SALVAGE",
+  text:`Peck bags up stims and water. <span class="say">"Stay breathing, friend. Repeat business is my favorite kind."</span>`,
+  effect:chain(caps(-45), give("stimpak",2), give("purified_water",2), ()=>toast("SUPPLIES ACQUIRED"),
+    logIt("Bought 2 Stimpaks and 2 Purified Water from Peck.")),
+  choices:[{ key:"1", label:"Back to the stall.", to:"trader" }] },
+trader_leave:{ crumb:"DRYWELL", text:`<span class="say">"Suit yourself! Peck'll be here."</span> He's already polishing a rusty toaster like it's a holy relic.`,
+  choices:[
+    { key:"1", label:"Go meet Saul Drywell at the well.", to:"saul" },
+    { key:"2", label:"Go find Scribe Aldous in the east tower.", to:"aldous" },
+    { key:"3", label:"Go to the bar.", to:"bar" },
+  ] },
+
+/* -------- ALDOUS (Brotherhood scribe — tech-for-tech) -------- */
+aldous:{
+  crumb:"DRYWELL · EAST WATER-TOWER",
+  text:
+`The east tower hums. Salvaged terminals blink in the gloom, and the air smells of ozone and machine oil. A thin man in the grey hood of a Brotherhood scribe looks up from a workbench, eyes magnified huge behind cracked goggles.
+
+<span class="say">"You're not local,"</span> Scribe Aldous says, in the clipped way of a man who'd rather talk to a circuit board. <span class="say">"Vault-Tec jumpsuit, intact Pip-Boy 3000, no rad-scarring — you came out of a sealed vault, and recently."</span> He sets down a soldering iron. <span class="say">"State your business, dweller. I warn you: the Brotherhood does not give. We acquire, we preserve, we trade. We do not give."</span>`,
+  choices:[
+    { key:"1", label:"[INT 6] Offer a full survey of Vault 73's intact pre-war systems for a regulator.",
+      to:"aldous_deal", check:{stat:"I",dc:6} },
+    { key:"2", label:"\"I need a RobCo reclamation regulator. Name your price.\"", to:"aldous_price" },
+    { key:"3", label:"\"Two hundred people are dying of thirst. Doesn't that move you at all?\"", to:"aldous_plea" },
+  ]
+},
+
+aldous_plea:{
+  crumb:"DRYWELL · ALDOUS",
+  text:
+`<span class="say">"Thirst,"</span> Aldous says, as if testing an unfamiliar word. <span class="say">"People die of thirst across this whole wasteland, dweller, every single day, and the Brotherhood does not ride out to each deathbed with a canteen. We are not a charity. We are the last hand keeping humanity's tools out of the fire."</span>
+
+He turns back to his bench. <span class="say">"If you want me to part with a regulator, give me a reason that serves the Brotherhood's mission — not your conscience. Technology for technology. That is the only language I trade in."</span> A pause. <span class="say">"You came out of an intact vault. Think harder about what you're standing in before you waste my time with feelings."</span>`,
+  choices:[
+    { key:"1", label:"[INT 6] \"Then trade tech for tech: a full survey of Vault 73's systems.\"",
+      to:"aldous_deal", check:{stat:"I",dc:6} },
+    { key:"2", label:"\"Fine. Name your price in caps or parts.\"", to:"aldous_price" },
+  ]
+},
+
+aldous_price:{
+  crumb:"DRYWELL · ALDOUS",
+  text:
+`Aldous actually laughs, a dry rustle. <span class="say">"Caps? I have no use for caps. A working deep-vault regulator is one of perhaps four in the entire Mojave, and you want to buy it like a bottle of Nuka-Cola."</span>
+
+He folds his arms. <span class="say">"There is exactly one thing you possess that the Brotherhood values more than the regulator: knowledge of an intact Vault-Tec installation. Vault 73's reactor, its purification array, its mainframe — all of it pristine, untouched, exactly as the Enclave's grandfathers left it. Grant the Brotherhood survey access — let me catalogue what's down there — and a regulator is yours. That is the deal. There is no other."</span>`,
+  choices:[
+    { key:"1", label:"[INT 6] Negotiate the survey terms to protect your people first.",
+      to:"aldous_deal", check:{stat:"I",dc:6} },
+    { key:"2", label:"Agree to the survey, plainly. \"Catalogue it. Just give me the part.\"", to:"aldous_simple" },
+    { key:"3", label:"\"I won't hand my home to the Brotherhood sight unseen.\" (Refuse.)", to:"aldous_refuse" },
+  ]
+},
+
+aldous_deal:{
+  crumb:"DRYWELL · ALDOUS · TERMS",
+  text:
+`You don't flinch, and you don't gush. You talk like an engineer to an engineer: survey access, yes — but documented, supervised, no removal of core systems, and Vault 73's people stay sovereign over their own door. In exchange: the regulator now, plus Aldous's word, witnessed, that the Brotherhood treats Vault 73 as a partner, not a salvage site.
+
+Aldous's magnified eyes narrow, then — grudgingly — warm. <span class="say">"You think like one of us. That's almost insulting."</span> He pulls a sealed crate from beneath the bench and lifts out a regulator: ceramic-and-steel, RobCo-stamped, immaculate. <span class="say">"Terms accepted, dweller. The Brotherhood honors a sharp negotiator more than a desperate one."</span>
+
+He places it in your hands. It's heavier than it looks, and it's two hundred lives.`,
+  effect:chain(flag("has_regulator"), flag("aldous_partner"),
+    logIt("<b>Negotiated</b> with Scribe Aldous: regulator now, supervised survey later, Vault 73 stays sovereign. You're carrying the part home.")),
+  choices:[
+    { key:"1", label:"\"And Saul's well? It's failing too.\"", to:"broker", need:{flag:"knows_regulators"},
+      hideUnless:"knows_regulators" },
+    { key:"2", label:"Take the regulator and start the long walk home.", to:"ending_hub" },
+  ]
+},
+
+aldous_simple:{
+  crumb:"DRYWELL · ALDOUS",
+  text:
+`<span class="say">"Catalogue it,"</span> you say. <span class="say">"Just give me the part."</span>
+
+Aldous nods once and produces the regulator without ceremony. <span class="say">"Wise. A vault that shares its knowledge survives; a vault that hoards it becomes a tomb we excavate later anyway."</span> The crate clicks shut. <span class="say">"My team will follow you to Vault 73 within the season. See that the door is open."</span>
+
+It's done. You have the part — and you've promised the Brotherhood a key to your home. Wynn will have opinions. But Wynn isn't the one out here with two hundred lives going dry, and the regulator is real in your hands.`,
+  effect:chain(flag("has_regulator"), flag("aldous_access"),
+    logIt("Agreed to full Brotherhood survey access for the regulator. You have the part; the Brotherhood gets a key to Vault 73.")),
+  choices:[
+    { key:"1", label:"\"What about Saul's failing well?\"", to:"broker", need:{flag:"knows_regulators"},
+      hideUnless:"knows_regulators" },
+    { key:"2", label:"Take the regulator and head home.", to:"ending_hub" },
+  ]
+},
+
+aldous_refuse:{
+  crumb:"DRYWELL · ALDOUS",
+  text:
+`<span class="say">"I won't hand my home to the Brotherhood,"</span> you say. <span class="say">"Not sight unseen. Not on faith."</span>
+
+Aldous regards you a long moment, and to your surprise there's something like respect in it. <span class="say">"Loyalty. Foolish, here, but I won't pretend I don't understand it."</span> He puts the crate away. <span class="say">"Then we have no deal — today. The regulator stays. When your people are three days from the end and you reconsider, the offer will stand. The Brotherhood is patient. Thirst is not."</span>
+
+You leave the tower empty-handed but unbought. There's another road to the part — the flooded RobCo facility east of town, where the Brotherhood pulls these crates from. Harder. More dangerous. But yours alone.`,
+  effect:chain(flag("refused_aldous"),
+    logIt("Refused to trade Vault 73's secrets. No regulator from Aldous — but the flooded RobCo facility east of town remains an option.")),
+  choices:[
+    { key:"1", label:"Go meet Saul Drywell — maybe he has another way.", to:"saul" },
+    { key:"2", label:"Take stock and end the day's reckoning here.", to:"ending_hub" },
+  ]
+},
+
+/* -------- SAUL (water-boss) -------- */
+saul:{
+  crumb:"DRYWELL · THE WELL PLATFORM",
+  text: ()=> (state.flags.tess_ally)
+    ? `Tess's word has gone ahead of you. The guard at the foot of the ladder waves you up.
+
+Saul Drywell is broad, sun-cured, and still as a man who's learned that stillness reads as power. He runs the town from a chair beside the well-head, one hand always resting on the pump as if he could feel the water through the steel.
+
+<span class="say">"Tess says you're worth ten minutes,"</span> he says, without turning. <span class="say">"She's stingy with that. So. A vaultie who knows water. My well's flow has dropped a fifth in two months and my engineer's a drunk. Tell me you're not just another mouth, dweller. Tell me what you see."</span>`
+    : `You climb the ladder uninvited, and the guard's rifle tracks you the whole way. Saul Drywell doesn't rise from his chair beside the well-head.
+
+<span class="say">"I don't know you,"</span> he says, flat. <span class="say">"And men I don't know don't get ten minutes on my platform. You've got thirty seconds. Spend 'em telling me why a vaultie is worth my time before Wick here walks you back down the hard way."</span>`,
+  choices:[
+    { key:"1", label:"[INT 6] Diagnose his well: \"Your flow's dropping because your intake's silting. I can prove it.\"",
+      to:"saul_fix", check:{stat:"I",dc:6} },
+    { key:"2", label:"[CHA 6] \"We want the same thing — water-tech the Brotherhood's hoarding. Let's get it together.\"",
+      to:"broker", check:{stat:"C",dc:6}, need:{flag:"knows_regulators"}, hideUnless:"knows_regulators" },
+    { key:"3", label:"\"My Vault needs a regulator. Help me, and I'll fix your well.\"", to:"saul_offer" },
+  ]
+},
+
+saul_fix:{
+  crumb:"DRYWELL · SAUL",
+  text:
+`You walk to the well-head, listen to the pump's rhythm, watch the gauge needle stutter, and lay a hand on the casing the way he does. Then you tell him: it's not the aquifer drying — it's the intake screen silting up downhole, choking the draw. Old RobCo deep-pumps all do it. Clear it, fit a proper reclamation regulator to stop the back-pressure, and his flow comes back inside a week.
+
+For the first time, Saul turns and looks at you like you're a person and not a problem.
+
+<span class="say">"...Huh,"</span> he says. <span class="say">"My drunk engineer's been blaming the gods for two months and you read it cold in thirty seconds."</span> He stands, joints cracking. <span class="say">"Alright, dweller. You've got my attention and my respect, and those don't come cheap. What do you want?"</span>`,
+  effect:chain(flag("saul_respect"), logIt("Diagnosed Drywell's failing well for Saul — silted intake, needs a regulator. Earned his respect.")),
+  choices:[
+    { key:"1", label:"[CHA 6] \"Same thing you need: a RobCo regulator. Aldous has a crate. Let's broker it.\"",
+      to:"broker", check:{stat:"C",dc:6}, need:{flag:"knows_regulators"}, hideUnless:"knows_regulators" },
+    { key:"2", label:"\"I need a regulator for my own Vault. Help me get one and I'll fix your well first.\"", to:"saul_offer" },
+  ]
+},
+
+saul_offer:{
+  crumb:"DRYWELL · SAUL",
+  text:
+`You lay your cards down: Vault 73, the dead pump, the regulator you've come a long way to find. And you make the trade plain — your engineering for his help, his weight in this town for your part.
+
+Saul drums his fingers on the pump. <span class="say">"You want the same regulator I want. The Brotherhood scribe's got a crate of 'em and won't sell to me — old grudge, he thinks I'm a warlord with a well."</span> He grunts. <span class="say">"But he might deal with a vaultie. You go up that east tower and you get Aldous to part with two — one for your hole in the ground, one for my well — and I'll send you home with an armed escort, a brahmin of supplies, and the standing friendship of the only water in fifty miles. That's the offer. Don't come back down empty."</span>`,
+  effect:chain(flag("saul_quest"), flag("knows_regulators"),
+    logIt("<b>Saul Drywell</b>: get two regulators from Aldous (one for the Vault, one for Drywell) and he sends you home with an escort, supplies, and an alliance.")),
+  choices:[
+    { key:"1", label:"Go to Aldous's tower to broker the regulators.", to:"aldous" },
+  ]
+},
+
+/* -------- THE BROKER (best path: save both) -------- */
+broker:{
+  crumb:"DRYWELL · BROKERING THE WATER",
+  text:
+`This is the thing you can do that no raider's gun and no scribe's dogma can: you can make two stubborn men need each other.
+
+You carry Saul's problem to Aldous and Aldous's price to Saul, and back again, all afternoon — until the shape of a deal stands up. Aldous gets his survey of Vault 73 and, sweeter still, gets to plant the Brotherhood's flag as the power that fixed Drywell's well, NCR banner be damned. Saul gets his flow back and a regulator besides. Vault 73 gets the part that keeps two hundred people breathing. Everybody gives a little. Nobody bleeds.
+
+When it's done, Aldous hands you two regulators in a padded crate, and something close to a smile. <span class="say">"You'd have made a fine scribe, dweller. You made men trade who'd sooner have fought."</span> Down at the well, Saul clasps your forearm like an equal. <span class="say">"Drywell remembers its friends. You ever need water, a gun, or a roof — you've got all three here. Now go home. Your people have waited two centuries; don't make 'em wait on you."</span>`,
+  effect:chain(flag("has_regulator"), flag("brokered_peace"), flag("aldous_partner"), flag("saul_ally"),
+    logIt("<b>Brokered the grand bargain</b>: regulators for Vault 73 AND Drywell, a Brotherhood survey on fair terms, and a standing alliance. Everyone wins.")),
+  choices:[
+    { key:"1", label:"Begin the long walk home — with friends at your back.", to:"ending_hub" },
+  ]
+},
+
+/* -------- ENDING HUB -------- */
+ending_hub:{
+  crumb:"DRYWELL · DUSK",
+  text:()=>{
+    if(state.flags.brokered_peace) return endHero();
+    if(state.flags.has_regulator) return endGood();
+    return endOpen();
+  },
+  choices:[
+    { key:"r", label:"Wake another dweller. (New game)", to:"intro", restart:true },
+  ]
+},
+
+};
+
+/* ---- ending texts ---- */
+function endHero(){ return (
+`You walk out of Drywell at dusk with two regulators on a borrowed brahmin, an NCR escort Saul shamed into lending you, and Mariel riding point because she "wasn't doing anything anyway."
+
+Behind you, the well of Drywell runs full for the first time in months, and a Brotherhood scribe is already drafting the survey that will, in its careful tin-can way, treat your home as a partner instead of a prize. Ahead, across the darkening Saltpan, a sealed door waits in a collapsed parking structure — and behind it, three faces among two hundred. Robin, who swore to come drag you home. Cass, waiting under a painted sky for the real one you promised them. Sam, counting days, holding the place where a lucky bottle cap used to be.
+
+You take out that scuffed cap, turn it over in the red light, and put it away again. The rule is you bring it back. You intend to keep the rule — and to bring back the water, the world, and yourself.
+
+<span class="ok">— END OF CHAPTER ONE: THE LONG WALK HOME —</span>
+The grand bargain. Vault 73 and Drywell both live, the Brotherhood owes you a favor, and everyone you love is still on the far side of that door, waiting. The walk home is the next chapter.`); }
+
+function endGood(){ return (
+`You shoulder your pack — heavier now, by one RobCo regulator and two hundred lives — and turn east, toward home.
+
+It cost you something to get it: a promise to the Brotherhood, a long road, a piece of who you were when the door first rolled open. But the part is real, and it's enough. Somewhere across the salt, a dry fountain waits to run again, an old Overseer counts the days you've been gone — and three people you'd cross a wasteland for wait with her. Robin, with their terrible jokes. Cass, with a promise about the sky. Sam, with a rule about a lucky cap.
+
+The wasteland didn't eat you. You learned its rules — trust earns trust, a steady spine beats a drawn gun, what you carry is who you are — and you turn back toward the dark carrying the one thing that got you across it: people worth going home to.
+
+<span class="ok">— END OF CHAPTER ONE: THE LONG WALK HOME —</span>
+You secured the regulator for Vault 73. The walk home is its own chapter — and everyone you love is at the end of it.`); }
+
+function endOpen(){ return (
+`Night comes to Drywell, and you take stock by lantern-light, Sam's lucky cap warm in your fist.
+
+You didn't get the regulator today — not on terms you'd accept. But you crossed the Saltpan, talked past raiders, healed a stranger, and walked into the one town that matters with your name your own. There's still the flooded RobCo facility east of town, hot with rads and thick with whatever's nested in the dark. There's still Aldous's standing offer, for the day desperation outvotes pride. There's still time — not much, but some.
+
+Two hundred people are counting days. Three of them are Robin, Cass, and Sam. Tomorrow you go and get them their water — one way or another, because the rule is you come home, and you intend to keep it.
+
+<span class="ok">— END OF CHAPTER ONE: THE LONG WALK HOME —</span>
+The hard road remains open. Vault 73 still thirsts, the people you love still wait, and the next chapter is yours to walk.`); }
+
+/* =====================================================================
+   ENGINE
+   ===================================================================== */
+const $=id=>document.getElementById(id);
+const screenEl=$("screen"), proseEl=$("prose"), crumbEl=$("crumb"),
+      choicesEl=$("choices"), skipHint=$("skiphint"), toastEl=$("toast");
+const reduceMotion=window.matchMedia("(prefers-reduced-motion:reduce)").matches;
+let typing=false, typeTimer=null, finishType=null, currentNode=null, currentNodeId=null;
+
+function toast(msg){
+  toastEl.textContent=msg; toastEl.classList.add("show");
+  clearTimeout(toast._t); toast._t=setTimeout(()=>toastEl.classList.remove("show"),2200);
+}
+
+function renderHUD(){
+  $("charName").textContent = state.name;
+  const hp=Math.round(state.hp/state.maxHp*10);
+  $("hpMeter").innerHTML=Array.from({length:10},(_,i)=>`<i class="${i<hp?'':'off'}"></i>`).join("");
+  const rd=Math.round(state.rads/10);
+  const rm=$("radMeter"); rm.classList.toggle("hot",state.rads>=70);
+  rm.innerHTML=Array.from({length:10},(_,i)=>`<i class="${i<rd?'':'off'}"></i>`).join("");
+}
+
+function checkVitals(){ if(state.hp<=0) return "death"; if(state.rads>=100) return "raddeath"; return null; }
+
+/* ---- text typing ---- */
+function escapeHtml(s){return s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+function typeOut(html, done){
+  let resolved = (typeof html==="function") ? html() : html;
+  resolved = resolved.replace(/\$caps\$/g, state.caps);
+  const tmp=document.createElement("div"); tmp.innerHTML=resolved;
+  const plain=tmp.textContent;
+  typing=true; skipHint.textContent="› tap text to skip ‹";
+  finishType=()=>{ clearInterval(typeTimer); proseEl.innerHTML=resolved+'<span class="cursor"></span>';
+    typing=false; skipHint.textContent=""; finishType=null; done&&done(); };
+  if(reduceMotion){ finishType(); return; }
+  let i=0;
+  typeTimer=setInterval(()=>{
+    i+=2; proseEl.innerHTML=escapeHtml(plain.slice(0,i))+'<span class="cursor"></span>';
+    screenEl.scrollTop=screenEl.scrollHeight;
+    if(i>=plain.length) finishType();
+  }, 9);
+}
+
+/* ---- requirement evaluation ---- */
+function meets(req){
+  if(!req) return true;
+  if(req.item && !has(req.item)) return false;
+  if(req.caps!=null && state.caps < req.caps) return false;
+  if(req.flag && !state.flags[req.flag]) return false;
+  return true;
+}
+function reqLabel(c){
+  if(c.check) return `[${c.check.stat} ${c.check.dc}]`;
+  return "";
+}
+
+/* ---- rendering choices & loot ---- */
+function renderChoices(node){
+  choicesEl.innerHTML="";
+  // loot first
+  (node.loot||[]).forEach(l=>{
+    if(state.flags["looted_"+l.id]) return;
+    const it=ITEMS[l.item];
+    const fits = it.cat==="pack" ? true : roomFor(l.item);
+    const b=document.createElement("button");
+    b.className="choice loot"+(fits?"":" locked");
+    b.innerHTML=`<span class="k">+</span>${l.label}`+(fits?"":` <span class="req">[PACK FULL]</span>`);
+    if(fits){
+      b.addEventListener("click",()=>{
+        if(it.cat==="pack"){ /* handled by onTake (setPack) */ }
+        else addItem(l.item,1);
+        state.flags["looted_"+l.id]=true;
+        if(l.onTake) l.onTake();
+        renderHUD();
+        if(it.cat!=="pack") toast("ACQUIRED · "+it.name.toUpperCase());
+        renderChoices(node);
+      });
+    } else b.disabled=true;
+    choicesEl.appendChild(b);
+  });
+
+  if(!node.choices || node.choices.length===0){
+    addBtn("↻","Wake another dweller. (Restart)", ()=>start(), "restart");
+    return;
+  }
+
+  node.choices.forEach(c=>{
+    // visibility gating
+    if(c.hideUnless && !state.flags[c.hideUnless]) return;
+    if(c.hideUnless_not && state.flags[c.hideUnless_not]) return;
+
+    const statOk = !c.check || state.sp[c.check.stat] >= c.check.dc;
+    const reqOk  = meets(c.need);
+    const ok = statOk && reqOk;
+    const reqTxt = reqLabel(c);
+
+    if(ok){
+      // strip leading [STAT n] duplicate if it's already in label? keep label as-is.
+      addBtn(c.key, c.label, ()=>navigate(c));
+    } else {
+      // locked
+      let lab = c.lockedLabel || c.label;
+      const b=addBtn(c.key, lab, null, "locked");
+      // append reason
+      if(c.check && !statOk){
+        b.innerHTML += ` <span class="req">— need ${c.check.stat} ${c.check.dc}</span>`;
+      }
+      b.disabled=true;
+    }
+  });
+}
+
+function addBtn(key,label,fn,cls){
+  const b=document.createElement("button");
+  b.className="choice"+(cls?(" "+cls):"");
+  b.innerHTML=`<span class="k">${key}</span>${label}`;
+  if(fn) b.addEventListener("click",fn);
+  choicesEl.appendChild(b);
+  return b;
+}
+
+function navigate(c){
+  if(c.restart){ start(); return; }
+  if(c.effect) c.effect();
+  if(c.give) c.give.forEach(g=>addItem(g[0],g[1]||1));
+  const dest = (typeof c.to==="function") ? c.to() : c.to;
+  const fatal=checkVitals();
+  render(fatal || dest);
+}
+
+const TERMINAL={death:1, raddeath:1, ending_hub:1};
+function render(id){
+  const node=NODES[id]; currentNode=node; currentNodeId=id;
+  // run node-level effect once per entry to this node
+  if(node.effect && !state.flags["_e_"+id]){ state.flags["_e_"+id]=true; node.effect(); }
+  // keep the Pip-Boy button correct (important after loading a save)
+  $("pipOpen").disabled = !state.flags.hasPipboy;
+  renderHUD();
+  crumbEl.textContent=node.crumb;
+  choicesEl.innerHTML="";
+  screenEl.scrollTop=0;
+  // persist progress: auto-save mid-run, clear the save once a run ends
+  if(TERMINAL[id]) eraseSave(); else saveGame();
+  typeOut(node.text, ()=>renderChoices(node));
+}
+
+/* death nodes */
+NODES.death={ crumb:"PIP-BOY · VITAL SIGNS LOST",
+  text:`The wasteland does what the wasteland does.
+
+Your legs go first, then the green light of the Pip-Boy narrows to a dot and winks out. Somewhere across the salt, a sealed door waits for a dweller who isn't coming, and an old Overseer will count ninety days and send the next one.
+
+<span class="bad">— THE DWELLER DID NOT SURVIVE THE LONG WALK. —</span>`,
+  choices:[] };
+NODES.raddeath={ crumb:"PIP-BOY · LETHAL RADIATION",
+  text:`The geiger counter's chatter becomes one long scream, and then, mercifully, nothing.
+
+You sink down in the hot dust. The Saltpan glitters, beautiful and patient, and takes you the way it's taken everything else.
+
+<span class="bad">— THE DWELLER SUCCUMBED TO RADIATION. (Mind your RADs — RadAway and Rad-X exist for a reason.) —</span>`,
+  choices:[] };
+
+/* =====================================================================
+   PIP-BOY OVERLAY
+   ===================================================================== */
+const pip=$("pip"), pipBody=$("pipBody");
+let activeTab="stat";
+function openPip(){ pip.classList.add("open"); pip.setAttribute("aria-hidden","false"); renderPip(); }
+function closePip(){ pip.classList.remove("open"); pip.setAttribute("aria-hidden","true"); }
+$("pipOpen").addEventListener("click",openPip);
+$("pipClose").addEventListener("click",closePip);
+document.querySelectorAll(".pip-tab").forEach(t=>t.addEventListener("click",()=>{
+  activeTab=t.dataset.tab;
+  document.querySelectorAll(".pip-tab").forEach(x=>x.classList.toggle("active",x===t));
+  renderPip();
+}));
+
+function renderPip(){
+  if(activeTab==="stat") renderStat();
+  else if(activeTab==="inv") renderInv();
+  else renderData();
+}
+
+function renderStat(){
+  const s=state;
+  const def = s.wornApparel?ITEMS[s.wornApparel].def:0;
+  const wn = s.equippedWeapon?ITEMS[s.equippedWeapon].name:"Unarmed";
+  const wd = weaponDmg();
+  let html=`
+    <div class="stat-row"><span class="nm">Identity</span><span class="vl">${s.name}</span></div>
+    <div class="stat-row"><span class="nm">Health</span><span class="vl">${Math.round(s.hp)} / ${s.maxHp}</span></div>
+    <div class="stat-row"><span class="nm">Radiation</span><span class="vl">${s.rads}</span></div>
+    <div class="stat-row"><span class="nm">Caps</span><span class="vl" style="color:var(--warn)">${s.caps}</span></div>
+    <div class="stat-row"><span class="nm">Equipped weapon</span><span class="vl">${wn} · ${wd} dmg</span></div>
+    <div class="stat-row"><span class="nm">Worn armor</span><span class="vl">${s.wornApparel?ITEMS[s.wornApparel].name:"—"} · ${def} def</span></div>
+    <div class="secthead">S.P.E.C.I.A.L.</div>
+    <div class="special-grid">`;
+  for(const k of ["S","P","E","C","I","A","L"]){
+    html+=`<div class="sp"><div class="l">${k}</div><div class="n">${s.sp[k]}</div></div>`;
+  }
+  html+=`</div><div style="font-size:12.5px;color:var(--dim);margin-top:6px;line-height:1.5">`;
+  html+=Object.keys(SPECIAL_NAMES).map(k=>`${k} · ${SPECIAL_NAMES[k]}`).join("&nbsp;&nbsp;");
+  html+=`</div>`;
+  pipBody.innerHTML=html;
+}
+
+function renderInv(){
+  const cap=capCount(), used=usedSlots();
+  let html="";
+  if(!state.pack){
+    html+=`<div class="packline">NO PACK — POCKETS ONLY</div>`;
+  } else {
+    html+=`<div class="packline">${ITEMS[state.pack].name.toUpperCase()}</div>`;
+  }
+  html+=`<div style="font-size:13px;color:var(--dim);margin-bottom:2px">CARRY ${used} / ${cap} slots</div>`;
+  html+=`<div class="capbar">`+Array.from({length:Math.max(cap,2)},(_,i)=>`<i class="${i<used?'':'off'}"></i>`).join("")+`</div>`;
+  html+=`<div class="cap-line">⛁ ${state.caps} caps</div>`;
+
+  const cats=[["weapon","Weapons"],["apparel","Apparel"],["aid","Aid"],["food","Food & Drink"],["ammo","Ammo"],["misc","Keepsakes"],["pack","Packs"]];
+  for(const [cat,label] of cats){
+    const ids=Object.keys(state.inv).filter(id=>state.inv[id]>0 && ITEMS[id].cat===cat);
+    if(cat==="pack"){ // only show active pack
+      if(!state.pack) continue;
+    }
+    if(ids.length===0) continue;
+    html+=`<div class="invcat"><h4>${label}</h4>`;
+    ids.forEach(id=>{
+      const it=ITEMS[id], q=state.inv[id];
+      const eqW = id===state.equippedWeapon, eqA = id===state.wornApparel, eqP = id===state.pack;
+      html+=`<div class="item">
+        <span class="iname">${it.name}${(eqW||eqA||eqP)?` <span class="eqd">[${eqW?'EQUIPPED':eqA?'WORN':'IN USE'}]</span>`:""}
+          <small>${it.desc||""}</small></span>`;
+      if(cat==="ammo"||q>1) html+=`<span class="qty">x${q}</span>`;
+      // actions
+      html+=`<span style="display:flex;gap:5px">`;
+      if(it.use) html+=`<button class="iact" data-act="use" data-id="${id}">USE</button>`;
+      if(cat==="weapon" && !eqW) html+=`<button class="iact" data-act="equip" data-id="${id}">EQUIP</button>`;
+      if(cat==="apparel" && !eqA) html+=`<button class="iact" data-act="wear" data-id="${id}">WEAR</button>`;
+      if(!eqP && cat!=="ammo") html+=`<button class="iact" data-act="drop" data-id="${id}">DROP</button>`;
+      html+=`</span></div>`;
+    });
+    html+=`</div>`;
+  }
+  if(Object.keys(state.inv).filter(id=>state.inv[id]>0 && ITEMS[id].cat!=="pack").length===0 && !state.pack){
+    html+=`<div class="empty">Your pockets are nearly empty. Find a pack out in the wasteland to carry more.</div>`;
+  }
+  pipBody.innerHTML=html;
+  pipBody.querySelectorAll(".iact").forEach(b=>b.addEventListener("click",()=>{
+    const id=b.dataset.id, act=b.dataset.act;
+    if(act==="use"){ useItem(id); toast("USED · "+ITEMS[id].name.toUpperCase()); }
+    else if(act==="equip"){ state.equippedWeapon=id; toast("EQUIPPED · "+ITEMS[id].name.toUpperCase()); }
+    else if(act==="wear"){ state.wornApparel=id; toast("WORN · "+ITEMS[id].name.toUpperCase()); }
+    else if(act==="drop"){ removeItem(id,1); toast("DROPPED · "+ITEMS[id].name.toUpperCase()); }
+    renderHUD(); renderInv();
+  }));
+}
+
+function renderData(){
+  let html="";
+  const anyBond = state.bonds && (state.bonds.robin||state.bonds.cass||state.bonds.sam);
+  if(anyBond){
+    html+=`<div class="secthead">The People You Carry</div>`;
+    const tie=(name,who,line)=>{
+      const b=state.bonds[who]||0;
+      const hearts = b>=5?"●●●":b>=3?"●●○":b>=1?"●○○":"○○○";
+      return `<div class="logentry"><b>${name}</b> &nbsp;<span style="color:var(--warn)">${hearts}</span><br><span style="color:var(--dim)">${line}</span></div>`;
+    };
+    html+=tie("Robin","robin","Your best friend since the nursery. Borrowed you a 10mm and a promise to drag you home.");
+    html+=tie("Cass","cass","The one you love. Hydroponics dreamer. Waiting under a painted sky for the real one.");
+    html+=tie("Sam","sam","Your younger sibling. Lent you their lucky cap. The rule is you bring it back.");
+  }
+  html+=`<div class="secthead">Quest Log & Journal</div>`;
+  if(state.log.length===0){ html+=`<div class="empty">No entries yet. Your story is just beginning.</div>`; }
+  else state.log.forEach(e=>{ html+=`<div class="logentry">› ${e}</div>`; });
+
+  html+=`<div class="secthead">Cloud Sync</div>${cloudStatusHTML()}`;
+
+  html+=`<div class="secthead">This Device</div>
+    <div style="font-size:13px;color:var(--dim);line-height:1.6;margin-bottom:8px">
+      Progress saves automatically after every scene${cloud.user?" and syncs to the cloud":""}. Reopen anytime and pick <b style="color:var(--green)">Continue</b>.</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="iact" id="manualSave">SAVE NOW</button>
+      <button class="iact" id="eraseBtn" style="border-color:var(--danger);color:var(--danger)">ERASE &amp; RESTART</button>
+    </div>`;
+  pipBody.innerHTML=html;
+
+  wireCloudUI();
+  const ms=document.getElementById("manualSave");
+  if(ms) ms.addEventListener("click", async ()=>{ const ok=await saveGame(); toast(ok?(cloud.user?"SAVED · SYNCED":"PROGRESS SAVED"):"SAVE UNAVAILABLE HERE"); });
+  const eb=document.getElementById("eraseBtn");
+  if(eb) eb.addEventListener("click", async ()=>{ await eraseSave(); closePip(); start(); });
+}
+
+/* =====================================================================
+   INPUT & BOOT
+   ===================================================================== */
+screenEl.addEventListener("click",()=>{ if(typing&&finishType) finishType(); });
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape" && pip.classList.contains("open")){ closePip(); return; }
+  if(pip.classList.contains("open")) return;
+  if(typing&&finishType){ finishType(); return; }
+  const btns=[...choicesEl.querySelectorAll(".choice:not(.locked)")];
+  const hit=btns.find(b=>b.querySelector(".k")?.textContent===e.key);
+  if(hit) hit.click();
+});
+
+/* ====================================================================
+   SAVE / LOAD  —  layered:
+     1) CLOUD (Firebase, optional) — syncs across devices when signed in
+     2) window.storage (Claude.ai artifact) — persists inside Claude
+     3) localStorage (your hosted site) — per-device fallback
+   ==================================================================== */
+
+/* ↓↓↓ PASTE YOUR FIREBASE CONFIG HERE to turn on cross-device cloud saves.
+   Leave apiKey as "" to run with local saves only. (Setup steps are in the
+   chat where this was built.) The values below come from your Firebase
+   project settings → "Your apps" → SDK setup & configuration. */
+const FIREBASE_CONFIG = {
+  apiKey: "",
+  authDomain: "",
+  projectId: "",
+  appId: ""
+};
+const FB_VERSION = "12.14.0";
+
+const cloud = { enabled:false, user:null, db:null, auth:null, api:null };
+
+async function initCloud(){
+  if(!FIREBASE_CONFIG.apiKey) return;            // not configured → skip, use local
+  try{
+    const [appMod, authMod, fsMod] = await Promise.all([
+      import(`https://www.gstatic.com/firebasejs/${FB_VERSION}/firebase-app.js`),
+      import(`https://www.gstatic.com/firebasejs/${FB_VERSION}/firebase-auth.js`),
+      import(`https://www.gstatic.com/firebasejs/${FB_VERSION}/firebase-firestore.js`),
+    ]);
+    const app = appMod.initializeApp(FIREBASE_CONFIG);
+    cloud.auth = authMod.getAuth(app);
+    cloud.db   = fsMod.getFirestore(app);
+    cloud.api  = Object.assign({}, authMod, fsMod);
+    cloud.enabled = true;
+    await new Promise(res=>{
+      let first=true;
+      authMod.onAuthStateChanged(cloud.auth, u=>{ cloud.user=u||null; updateCloudUI(); if(first){first=false;res();} });
+    });
+  }catch(e){ cloud.enabled=false; }              // blocked (e.g. inside Claude) → local only
+}
+function authErr(e){
+  const m=(e&&e.code||"").split("/")[1]||"";
+  if(m.includes("email-already")) return "EMAIL ALREADY REGISTERED — TRY SIGN IN";
+  if(m.includes("invalid-email")) return "INVALID EMAIL";
+  if(m.includes("weak-password")) return "PASSWORD TOO SHORT (MIN 6)";
+  if(m.includes("invalid-credential")||m.includes("wrong-password")||m.includes("user-not-found")) return "EMAIL OR PASSWORD INCORRECT";
+  return "SIGN-IN ERROR — CHECK CONNECTION";
+}
+async function cloudSave(payload){
+  if(!cloud.user) return false;
+  try{ await cloud.api.setDoc(cloud.api.doc(cloud.db,"saves",cloud.user.uid),{data:JSON.stringify(payload),updated:Date.now()}); return true; }
+  catch(e){ return false; }
+}
+async function cloudLoad(){
+  if(!cloud.user) return null;
+  try{ const s=await cloud.api.getDoc(cloud.api.doc(cloud.db,"saves",cloud.user.uid));
+       if(s.exists()){ const d=s.data(); return d.data?JSON.parse(d.data):null; } return null; }
+  catch(e){ return null; }
+}
+
+/* ---- local store (window.storage in Claude, else localStorage) ---- */
+const SAVE_KEY="vault73_save";
+const inClaude = (typeof window!=="undefined" && window.storage);
+function localPut(payload){
+  try{
+    if(inClaude){ window.storage.set(SAVE_KEY, JSON.stringify(payload), false).catch(()=>{}); return; }
+    localStorage.setItem(SAVE_KEY, JSON.stringify(payload));
+  }catch(e){}
+}
+async function localGet(){
+  try{
+    if(inClaude){ const r=await window.storage.get(SAVE_KEY,false); return (r&&r.value)?JSON.parse(r.value):null; }
+    const v=localStorage.getItem(SAVE_KEY); return v?JSON.parse(v):null;
+  }catch(e){ return null; }
+}
+function localClear(){
+  try{
+    if(inClaude){ window.storage.delete(SAVE_KEY,false).catch(()=>{}); return; }
+    localStorage.removeItem(SAVE_KEY);
+  }catch(e){}
+}
+
+/* ---- unified API used by the game ---- */
+async function saveGame(){
+  const payload={ v:1, node:currentNodeId, state };
+  localPut(payload);              // always keep a local cache
+  if(cloud.user) cloudSave(payload);
+  return true;
+}
+async function loadGame(){
+  if(cloud.user){ const c=await cloudLoad(); if(c) return c; }
+  return await localGet();
+}
+async function eraseSave(){
+  localClear();
+  if(cloud.user) cloudSave({v:1,node:"intro",state:freshState(),erased:true});
+}
+
+function resumeGame(saved){
+  state = saved.state;
+  if(!state.bonds) state.bonds={robin:0,cass:0,sam:0};
+  closePip();
+  render(saved.node && NODES[saved.node] ? saved.node : "intro");
+}
+
+function showContinuePrompt(saved){
+  state = saved.state;
+  if(!state.bonds) state.bonds={robin:0,cass:0,sam:0};
+  $("pipOpen").disabled = !state.flags.hasPipboy;
+  renderHUD();
+  closePip();
+  currentNode=null;
+  crumbEl.textContent="VAULT 73 · PIP-BOY · SAVED RECORD";
+  const place = (NODES[saved.node]&&NODES[saved.node].crumb) ? NODES[saved.node].crumb : "the wasteland";
+  const src = cloud.user ? "synced from the cloud" : "held on this device";
+  proseEl.innerHTML =
+    `The Pip-Boy wakes with a record already in its memory — your last walk, ${src}.\n\n`+
+    `<span class="ok">SAVED RUN — ${escapeHtml(state.name||"DWELLER")}</span>\n`+
+    `HP ${Math.round(state.hp)}/${state.maxHp}   ·   RAD ${state.rads}   ·   ${state.caps} caps\n`+
+    `Last seen: ${escapeHtml(place)}\n\n`+
+    `Pick up where you left off, or wake a new dweller and start the long walk over?`+
+    `<span class="cursor"></span>`;
+  skipHint.textContent="";
+  choicesEl.innerHTML="";
+  addBtn("1","Continue your walk.", ()=>resumeGame(saved));
+  addBtn("2","Wake a new dweller. (Erases this saved run)", async ()=>{ await eraseSave(); start(); }, "restart");
+}
+
+/* ---- cloud sign-in UI lives in the Pip-Boy DATA tab ---- */
+function cloudStatusHTML(){
+  if(!FIREBASE_CONFIG.apiKey)
+    return `<div style="font-size:13px;color:var(--dim);line-height:1.6">Cloud sync isn't set up on this copy — your progress saves on this one device. To sync between your phone and computer, add a Firebase config (setup steps are in the chat).</div>`;
+  if(!cloud.enabled)
+    return `<div style="font-size:13px;color:var(--dim);line-height:1.6">Cloud sync is configured but can't run here (this environment blocks it). It will work on your hosted site. Saving locally for now.</div>`;
+  if(!cloud.user)
+    return `<div style="font-size:13px;color:var(--dim);line-height:1.6;margin-bottom:7px">Sign in to sync this run across devices. New here? Create an account — it's just a tag for your save.</div>
+      <input id="cEmail" type="email" placeholder="email" autocomplete="username"
+        style="width:100%;margin-bottom:6px;background:rgba(54,255,126,.06);border:1px solid var(--dim);color:var(--bright);font-family:'JetBrains Mono',monospace;font-size:14px;padding:7px 9px;border-radius:5px">
+      <input id="cPass" type="password" placeholder="password (6+ chars)" autocomplete="current-password"
+        style="width:100%;margin-bottom:8px;background:rgba(54,255,126,.06);border:1px solid var(--dim);color:var(--bright);font-family:'JetBrains Mono',monospace;font-size:14px;padding:7px 9px;border-radius:5px">
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="iact" id="cSignin">SIGN IN</button>
+        <button class="iact" id="cSignup">CREATE ACCOUNT</button>
+      </div>`;
+  return `<div style="font-size:13.5px;color:var(--green);margin-bottom:7px">☁ Synced — signed in as <b style="color:var(--bright)">${escapeHtml(cloud.user.email||"player")}</b></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="iact" id="cPull">⬇ LOAD CLOUD SAVE</button>
+        <button class="iact" id="cPush">⬆ UPLOAD THIS RUN</button>
+        <button class="iact" id="cOut" style="border-color:var(--dim);color:var(--dim)">SIGN OUT</button>
+      </div>`;
+}
+function wireCloudUI(){
+  const g=id=>document.getElementById(id);
+  const em=()=>g("cEmail")?g("cEmail").value.trim():"", pw=()=>g("cPass")?g("cPass").value:"";
+  if(g("cSignin")) g("cSignin").addEventListener("click", async()=>{ try{ await cloud.api.signInWithEmailAndPassword(cloud.auth,em(),pw()); toast("SIGNED IN"); }catch(e){ toast(authErr(e)); } });
+  if(g("cSignup")) g("cSignup").addEventListener("click", async()=>{ try{ await cloud.api.createUserWithEmailAndPassword(cloud.auth,em(),pw()); toast("ACCOUNT CREATED · UPLOAD YOUR RUN"); }catch(e){ toast(authErr(e)); } });
+  if(g("cOut"))    g("cOut").addEventListener("click", async()=>{ try{ await cloud.api.signOut(cloud.auth); toast("SIGNED OUT"); }catch(e){} });
+  if(g("cPush"))   g("cPush").addEventListener("click", async()=>{ const ok=await cloudSave({v:1,node:currentNodeId,state}); toast(ok?"UPLOADED TO CLOUD":"UPLOAD FAILED"); });
+  if(g("cPull"))   g("cPull").addEventListener("click", async()=>{ const c=await cloudLoad(); if(c&&c.state&&c.node){ resumeGame(c); toast("CLOUD SAVE LOADED"); } else toast("NO CLOUD SAVE YET"); });
+}
+function updateCloudUI(){ if(pip.classList.contains("open") && activeTab==="data") renderData(); }
+
+function start(){
+  state=freshState();
+  $("pipOpen").disabled=true;
+  closePip();
+  render("intro");
+}
+
+async function boot(){
+  await initCloud();
+  const saved = await loadGame();
+  if(saved && saved.state && saved.node && !saved.erased && !TERMINAL[saved.node]) showContinuePrompt(saved);
+  else start();
+}
+boot();
+</script>
