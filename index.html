@@ -171,7 +171,7 @@
     <span class="bar"><span class="tag">HP</span><span class="meter" id="hpMeter"></span></span>
     <span class="bar"><span class="tag">RAD</span><span class="meter rads" id="radMeter"></span></span>
     <span class="spacer"></span>
-    <button class="pip-btn" id="pipOpen" disabled>▸ PIP-BOY</button>
+    <button class="pip-btn" id="pipOpen">▸ PIP-BOY</button>
   </div>
 
   <div class="screen" id="screen">
@@ -230,7 +230,7 @@ const ITEMS = {
   // act one
   vault_field_pack:{name:"Vault 73 Field Pack",cat:"pack",capacity:6,size:0,desc:"A small issue pack from the vault stores. Six slots — all they could spare."},
   vault_wrench:{name:"Vault 73 Wrench",cat:"weapon",kind:"melee",dmg:13,size:1,desc:"Your wrench. You know its weight better than your own hand."},
-  sams_cap:{name:"Sam's Lucky Cap",cat:"misc",size:0,desc:"A scuffed bottle cap your sibling pressed into your palm. \"So you remember to come back.\""},
+  sams_cap:{name:"Lark's Lucky Cap",cat:"misc",size:0,desc:"A scuffed bottle cap your kid sister pressed into your palm. \"So you remember to come back.\""},
   cass_locket:{name:"Cass's Photo",cat:"misc",size:0,desc:"A cracked photo of the two of you by the hydroponics lights. Worth more than caps."},
 };
 const SPECIAL_NAMES={S:"STRENGTH",P:"PERCEPTION",E:"ENDURANCE",C:"CHARISMA",I:"INTELLIGENCE",A:"AGILITY",L:"LUCK"};
@@ -254,7 +254,7 @@ const capCount = () => state.pack ? ITEMS[state.pack].capacity : 2;
 function usedSlots(){
   let n=0;
   for(const id in state.inv){
-    if(state.inv[id]<=0) continue;
+    if(state.inv[id]<=0 || !ITEMS[id]) continue;
     if(id===state.equippedWeapon||id===state.wornApparel||id===state.pack) continue;
     if(ITEMS[id].cat==="ammo") continue;
     n += ITEMS[id].size * state.inv[id];
@@ -331,18 +331,18 @@ intro:{
   text:
 `You wake the way you always do — to the hum. Two hundred years of unbroken machine-breath in the walls, so constant you only notice it in dreams, where the world is silent and wrong.
 
-Then you notice the other thing: a weight on your legs and a grin three inches from your face. Sam, your younger sibling, has climbed onto your bunk to wake you the way they've done since they could walk.
+Then you notice the other thing: a weight on your legs and a grin three inches from your face. Lark, your younger sister, has climbed onto your bunk to wake you the way she's done since she could walk.
 
-<span class="say">"You're late, you're late, you slept through the bell,"</span> Sam announces, delighted. <span class="say">"Robin already went down. And the shower on our level's doing the spitty thing again — Mr. Okafor was cussing about it. Third time this week!"</span> They flop back dramatically. <span class="say">"Everybody says you're the only one who can fix anything. So fix the water before it gets weird, okay? It's getting weird."</span>
+<span class="say">"You're late, you're late, you slept through the bell,"</span> Lark announces, delighted. <span class="say">"Dax already went down. And the shower on our level's doing the spitty thing again — Mr. Okafor was cussing about it. Third time this week!"</span> She flops back dramatically. <span class="say">"Everybody says you're the only one who can fix anything. So fix the water before it gets weird, okay? It's getting weird."</span>
 
 You're the vault's utility tech — the one they send when a door won't seal or a pump skips a beat. Around here they call you Sparks. It's a small life, three hundred meters of steel and a sky painted on the cafeteria ceiling. But it's yours, and the people in it are yours, and this morning that feels like enough.`,
   choices:[
     { key:"1", label:"Pull the shower regulator apart before shift — that \"spitty thing\" is bugging you.",
       to:"a_mess", effect:chain(sp("I",1), sp("P",1), flag("noticed_water"),
         logIt("Morning: you tore into the level's water regulator before shift. Pressure's down — and it's not the regulator.")) },
-    { key:"2", label:"Race Sam down to the mess and let them win by a hair.",
+    { key:"2", label:"Race Lark down to the mess and let her win by a hair.",
       to:"a_mess", effect:chain(sp("A",1), bond("sam",1),
-        logIt("Morning: raced Sam to the mess and let them win. Their laugh is the best sound in the vault.")) },
+        logIt("Morning: raced Lark to the mess and let her win. Her laugh is the best sound in the vault.")) },
     { key:"3", label:"Knock out your morning lifting set first — old habit, keeps you steady.",
       to:"a_mess", effect:chain(sp("S",1), sp("E",1),
         logIt("Morning: got your lifting set in before shift, same as every day.")) },
@@ -352,21 +352,21 @@ You're the vault's utility tech — the one they send when a door won't seal or 
 a_mess:{
   crumb:"VAULT 73 · MESS HALL · 06:40",
   text:
-`The mess smells of reconstituted eggs and chlorine. Robin's already at your usual table, boots up on a chair, holding it for you the way they have since you were both eight and the bigger kids ran the cafeteria.
+`The mess smells of reconstituted eggs and chlorine. Dax's already at your usual table, boots up on a chair, holding it for you the way he has since you were both eight and the bigger kids ran the cafeteria.
 
-<span class="say">"There's Sparks,"</span> Robin says, kicking the chair out for you. <span class="say">"You hear? Pressure's down on three levels now, not just ours. Maintenance is 'monitoring it.'"</span> They make air-quotes with a fork. <span class="say">"Which is maintenance for 'we have no idea.' Tell me you have an idea. You always have an idea."</span>
+<span class="say">"There's Sparks,"</span> Dax says, kicking the chair out for you. <span class="say">"You hear? Pressure's down on three levels now, not just ours. Maintenance is 'monitoring it.'"</span> He makes air-quotes with a fork. <span class="say">"Which is maintenance for 'we have no idea.' Tell me you have an idea. You always have an idea."</span>
 
 Down the table, old Okafor grumbles that in his grandmother's day the taps never so much as hiccuped, and a couple of the younger dwellers go quiet, the way people do when a small worry starts looking for somewhere to grow.`,
   choices:[
     { key:"1", label:"\"It's not the regulators. If three levels are dropping together, it's upstream — the intake.\"",
       to:"a_servo", effect:chain(sp("I",2), flag("suspects_intake"),
-        logIt("You told Robin the pressure drop is upstream at the aquifer intake — not the local regulators.")) },
+        logIt("You told Dax the pressure drop is upstream at the aquifer intake — not the local regulators.")) },
     { key:"2", label:"Wave it off and steady the table — no sense letting a hiccup become a panic.",
       to:"a_servo", effect:chain(sp("C",2), bond("robin",1),
         logIt("Kept the mess hall calm about the water — talked the worry back down.")) },
     { key:"3", label:"\"I'll pull the pump-room logs myself after shift. We'll know for sure.\"",
       to:"a_servo", effect:chain(sp("E",1), sp("P",1), flag("will_check_pump"),
-        logIt("Promised Robin you'd pull the pump-room logs after shift and get a real answer.")) },
+        logIt("Promised Dax you'd pull the pump-room logs after shift and get a real answer.")) },
   ]
 },
 
@@ -394,9 +394,9 @@ a_clinic:{
   text:
 `You're rerouting cable past the clinic when a cry pulls you in. A dweller's gone down in the waiting area — sweating, grey, breathing wrong. The clinic is hot, far too hot; the air recyclers run off the same water loop as everything else, and that loop is sick.
 
-And there, already kneeling by the fallen man with a cool cloth and steady hands, is Cass.
+And there, already kneeling by the fallen man with a cool cloth and steady hands, is Cassara — Cass, to you.
 
-You two have been something more than friends for a year now, careful and quiet about it the way the vault makes you be. Cass looks up, and the worry in their eyes isn't just for the patient. <span class="say">"It's the heat,"</span> they say. <span class="say">"Third one today. The recyclers can't keep up, and the doctor won't say why out loud."</span> They lower their voice so only you can hear. <span class="say">"But you know why. Don't you, Sparks."</span>`,
+You two have been something more than friends for a year now, careful and quiet about it the way the vault makes you be. Cass looks up, and the worry in her eyes isn't just for the patient. <span class="say">"It's the heat,"</span> she says. <span class="say">"Third one today. The recyclers can't keep up, and the doctor won't say why out loud."</span> She lowers her voice so only you can hear. <span class="say">"But you know why. Don't you, Sparks."</span>`,
   choices:[
     { key:"1", label:"Read the man's symptoms and call the treatment before the doctor does.",
       to:"a_cass", effect:chain(sp("I",1), sp("P",1), logIt("Diagnosed the collapsed dweller in the clinic — heat exhaustion from the failing cooling loop.")) },
@@ -415,9 +415,9 @@ a_cass:{
 
 <span class="say">"Tell me the truth,"</span> Cass says quietly. <span class="say">"Not the version you tell the mess hall. The water. How bad."</span>
 
-You tell them what your gut already knows: the intake's failing, the pump's straining, and the vault has been quietly drinking its own reserves for weeks. Cass takes it in without flinching — they've held dying hands, they don't flinch — but their fingers find yours and hold on.
+You tell them what your gut already knows: the intake's failing, the pump's straining, and the vault has been quietly drinking its own reserves for weeks. Cass takes it in without flinching — she's held dying hands, she doesn't flinch — but her fingers find yours and hold on.
 
-<span class="say">"You know what I think about, when I can't sleep?"</span> they murmur. <span class="say">"The sky. The real one. They painted a fake one on the cafeteria ceiling and called it a kindness, but I want to stand under the true one with you, just once, before I'm old."</span> They almost laugh. <span class="say">"Stupid, right? Wanting the one thing the door's there to keep out."</span>`,
+<span class="say">"You know what I think about, when I can't sleep?"</span> she murmurs. <span class="say">"The sky. The real one. They painted a fake one on the cafeteria ceiling and called it a kindness, but I want to stand under the true one with you, just once, before I'm old."</span> She almost laughs. <span class="say">"Stupid, right? Wanting the one thing the door's there to keep out."</span>`,
   choices:[
     { key:"1", label:"\"It's not stupid. Promise me — if the door ever opens, we see it together.\"",
       to:"a_pump", effect:chain(sp("C",2), bond("cass",2), flag("sky_promise"),
@@ -454,7 +454,7 @@ Wynn stares at the ruined part in your hands. <span class="say">"...Can you fix 
 a_assembly:{
   crumb:"VAULT 73 · ATRIUM · 19:00",
   text:
-`Wynn calls the whole vault to the atrium, under the painted sky, around the dry stone fountain where children used to throw caps for luck. Two hundred faces. You find the three that matter: Robin near the front with their arms crossed too tight; Cass against the wall, already looking at you; Sam, small in the crowd, holding someone's hand and watching you because you're the one who fixes things.
+`Wynn calls the whole vault to the atrium, under the painted sky, around the dry stone fountain where children used to throw caps for luck. Two hundred faces. You find the three that matter: Dax near the front with his arms crossed too tight; Cass against the wall, already looking at you; Lark, small in the crowd, holding someone's hand and watching you because you're the one who fixes things.
 
 Wynn doesn't soften it. The pump is dead. The part can't be made down here. Rationing begins tonight, and even at half a cup a day, the reserves give the vault ninety days. Then nothing.
 
@@ -467,7 +467,7 @@ The atrium goes very quiet. Everyone understands what she's asking. Almost no on
         logIt("Climbed the dry fountain and steadied two hundred terrified people when the vault learned the truth.")) },
     { key:"2", label:"Hold your ground and your nerve while the fear washes over the crowd. Think it through.",
       to:"a_decision", effect:chain(sp("E",2), logIt("Kept your nerve in the panicking atrium and thought the problem through to its only answer.")) },
-    { key:"3", label:"Watch the three faces that matter — Robin, Cass, Sam — and let that decide you.",
+    { key:"3", label:"Watch the three faces that matter — Dax, Cass, Lark — and let that decide you.",
       to:"a_decision", effect:chain(sp("P",1), bond("robin",1), bond("cass",1), bond("sam",1),
         logIt("In the panic, you watched the only three faces that mattered — and knew what you had to do.")) },
   ]
@@ -476,11 +476,11 @@ The atrium goes very quiet. Everyone understands what she's asking. Almost no on
 a_decision:{
   crumb:"VAULT 73 · ATRIUM · 19:20",
   text:
-`You already know it's you. You knew it before Wynn called the assembly. You're the only tech who understands the pump well enough to recognize the right part when you find it; you're young enough to make the walk; and when you look at Sam's face in that crowd, the math stops being math.
+`You already know it's you. You knew it before Wynn called the assembly. You're the only tech who understands the pump well enough to recognize the right part when you find it; you're young enough to make the walk; and when you look at Lark's face in that crowd, the math stops being math.
 
 You say it out loud so the whole vault hears, so no one else's child has to volunteer their parent: <span class="say">"I'll go."</span>
 
-The silence breaks differently this time — not panic, but the terrible relief of two hundred people who get to keep being afraid for someone else instead of themselves. Wynn closes her eyes a moment. Robin shoulders to the front, jaw working. Cass hasn't moved from the wall, but their hand is pressed flat over their mouth. And Sam has gone utterly, frighteningly still.
+The silence breaks differently this time — not panic, but the terrible relief of two hundred people who get to keep being afraid for someone else instead of themselves. Wynn closes her eyes a moment. Dax shoulders to the front, jaw working. Cass hasn't moved from the wall, but her hand is pressed flat over her mouth. And Lark has gone utterly, frighteningly still.
 
 Why you, when it comes down to it — what do you carry out that door?`,
   choices:[
@@ -490,9 +490,9 @@ Why you, when it comes down to it — what do you carry out that door?`,
     { key:"2", label:"Because you made Cass a promise about the sky — and you keep your promises.",
       to:"a_goodbye", effect:chain(sp("C",1), sp("L",1), bond("cass",1), flag("motive_promise"),
         logIt("You volunteered, in part, to keep a promise to Cass about seeing the real sky together.")) },
-    { key:"3", label:"Because Sam still believes you can fix anything — and you refuse to be the one who proves them wrong.",
+    { key:"3", label:"Because Lark still believes you can fix anything — and you refuse to be the one who proves her wrong.",
       to:"a_goodbye", effect:chain(sp("E",1), bond("sam",2), flag("motive_sam"),
-        logIt("You volunteered so Sam never learns there's a thing their sibling couldn't fix.")) },
+        logIt("You volunteered so Lark never learns there's a thing her sibling couldn't fix.")) },
   ]
 },
 
@@ -502,17 +502,17 @@ a_goodbye:{
   text:
 `They don't let you go empty-handed, and they don't let you go alone to the threshold. The vault gathers what it can spare, but the three who matter come with their own gifts, in the corridor before the door.
 
-Robin gets to you first, shoving something heavy and wrapped into your chest. <span class="say">"Lifted it from the security locker. Don't tell Wynn."</span> It's a 10mm pistol and a box of rounds. Their grin is doing a lot of work to hold their face together. <span class="say">"You come back, Sparks. You come back, or I'm coming out there to drag you home and I will complain the entire way."</span>
+Dax gets to you first, shoving something heavy and wrapped into your chest. <span class="say">"Lifted it from the security locker. Don't tell Wynn."</span> It's a 10mm pistol and a box of rounds. His grin is doing a lot of work to hold his face together. <span class="say">"You come back, Sparks. You come back, or I'm coming out there to drag you home and I will complain the entire way."</span>
 
-Cass presses a doctor's bundle into your hands — stimpaks, a bag of RadAway, everything the clinic could justify losing — and then, quieter, a cracked photo of the two of you under the grow-lights. <span class="say">"So you remember what you're walking back to,"</span> they whisper. They don't say the promise out loud. They don't have to.
+Cass presses a doctor's bundle into your hands — stimpaks, a bag of RadAway, everything the clinic could justify losing — and then, quieter, a cracked photo of the two of you under the grow-lights. <span class="say">"So you remember what you're walking back to,"</span> she whispers. She doesn't say the promise out loud. She doesn't have to.
 
-And Sam. Sam steps up last, very brave and very small, and folds something into your palm: a scuffed bottle cap, their lucky one, the one they fished out of the dry fountain years ago. <span class="say">"It's the luckiest thing I have,"</span> Sam says, voice wobbling. <span class="say">"So you have to bring it back. You have to. That's the rule."</span>`,
+And Lark. Lark steps up last, very brave and very small, and folds something into your palm: a scuffed bottle cap, her lucky one, the one she fished out of the dry fountain years ago. <span class="say">"It's the luckiest thing I have,"</span> Lark says, voice wobbling. <span class="say">"So you have to bring it back. You have to. That's the rule."</span>`,
   effect:chain(
     arm("pistol10mm"), give("ammo10mm",24),
     give("stimpak",3), give("radaway",1), give("cass_locket",1),
     give("sams_cap",1), sp("L",1),
     bond("robin",2), bond("cass",2), bond("sam",2),
-    logIt("Robin gave you a 10mm and rounds. Cass gave you stimpaks, RadAway, and a photo. Sam gave you their lucky cap — on the condition you bring it home.")),
+    logIt("Dax gave you a 10mm and rounds. Cass gave you stimpaks, RadAway, and a photo. Lark gave you her lucky cap — on the condition you bring it home.")),
   choices:[
     { key:"1", label:"Hold all three of them one last time, and let go.", to:"pipboy_boot" },
   ]
@@ -551,7 +551,7 @@ door:{
 
 Wynn nods to the control booth. The release klaxon sounds. Pistons the size of your leg drive into the rock, and the great door shrieks against two centuries of dust and rolls aside — and for the first time in your life, you feel wind that no machine made, smell air no recycler cleaned.
 
-The tunnel beyond climbs toward a coin of painful white light. Sam is crying somewhere behind you. Cass is not, by what must be an act of enormous will. Robin says, far too loudly, <span class="say">"See you soon, Sparks,"</span> and it almost sounds like a fact.
+The tunnel beyond climbs toward a coin of painful white light. Lark is crying somewhere behind you. Cass is not, by what must be an act of enormous will. Dax says, far too loudly, <span class="say">"See you soon, Sparks,"</span> and it almost sounds like a fact.
 
 You step toward the light, and the only world you've ever known stays behind you, counting days.`,
   choices:[
@@ -1222,7 +1222,7 @@ ending_hub:{
 function endHero(){ return (
 `You walk out of Drywell at dusk with two regulators on a borrowed brahmin, an NCR escort Saul shamed into lending you, and Mariel riding point because she "wasn't doing anything anyway."
 
-Behind you, the well of Drywell runs full for the first time in months, and a Brotherhood scribe is already drafting the survey that will, in its careful tin-can way, treat your home as a partner instead of a prize. Ahead, across the darkening Saltpan, a sealed door waits in a collapsed parking structure — and behind it, three faces among two hundred. Robin, who swore to come drag you home. Cass, waiting under a painted sky for the real one you promised them. Sam, counting days, holding the place where a lucky bottle cap used to be.
+Behind you, the well of Drywell runs full for the first time in months, and a Brotherhood scribe is already drafting the survey that will, in its careful tin-can way, treat your home as a partner instead of a prize. Ahead, across the darkening Saltpan, a sealed door waits in a collapsed parking structure — and behind it, three faces among two hundred. Dax, who swore to come drag you home. Cass, waiting under a painted sky for the real one you promised her. Lark, counting days, holding the place where a lucky bottle cap used to be.
 
 You take out that scuffed cap, turn it over in the red light, and put it away again. The rule is you bring it back. You intend to keep the rule — and to bring back the water, the world, and yourself.
 
@@ -1232,7 +1232,7 @@ The grand bargain. Vault 73 and Drywell both live, the Brotherhood owes you a fa
 function endGood(){ return (
 `You shoulder your pack — heavier now, by one RobCo regulator and two hundred lives — and turn east, toward home.
 
-It cost you something to get it: a promise to the Brotherhood, a long road, a piece of who you were when the door first rolled open. But the part is real, and it's enough. Somewhere across the salt, a dry fountain waits to run again, an old Overseer counts the days you've been gone — and three people you'd cross a wasteland for wait with her. Robin, with their terrible jokes. Cass, with a promise about the sky. Sam, with a rule about a lucky cap.
+It cost you something to get it: a promise to the Brotherhood, a long road, a piece of who you were when the door first rolled open. But the part is real, and it's enough. Somewhere across the salt, a dry fountain waits to run again, an old Overseer counts the days you've been gone — and three people you'd cross a wasteland for wait with her. Dax, with his terrible jokes. Cass, with a promise about the sky. Lark, with a rule about a lucky cap.
 
 The wasteland didn't eat you. You learned its rules — trust earns trust, a steady spine beats a drawn gun, what you carry is who you are — and you turn back toward the dark carrying the one thing that got you across it: people worth going home to.
 
@@ -1240,11 +1240,11 @@ The wasteland didn't eat you. You learned its rules — trust earns trust, a ste
 You secured the regulator for Vault 73. The walk home is its own chapter — and everyone you love is at the end of it.`); }
 
 function endOpen(){ return (
-`Night comes to Drywell, and you take stock by lantern-light, Sam's lucky cap warm in your fist.
+`Night comes to Drywell, and you take stock by lantern-light, Lark's lucky cap warm in your fist.
 
 You didn't get the regulator today — not on terms you'd accept. But you crossed the Saltpan, talked past raiders, healed a stranger, and walked into the one town that matters with your name your own. There's still the flooded RobCo facility east of town, hot with rads and thick with whatever's nested in the dark. There's still Aldous's standing offer, for the day desperation outvotes pride. There's still time — not much, but some.
 
-Two hundred people are counting days. Three of them are Robin, Cass, and Sam. Tomorrow you go and get them their water — one way or another, because the rule is you come home, and you intend to keep it.
+Two hundred people are counting days. Three of them are Dax, Cass, and Lark. Tomorrow you go and get them their water — one way or another, because the rule is you come home, and you intend to keep it.
 
 <span class="ok">— END OF CHAPTER ONE: THE LONG WALK HOME —</span>
 The hard road remains open. Vault 73 still thirsts, the people you love still wait, and the next chapter is yours to walk.`); }
@@ -1256,7 +1256,7 @@ const $=id=>document.getElementById(id);
 const screenEl=$("screen"), proseEl=$("prose"), crumbEl=$("crumb"),
       choicesEl=$("choices"), skipHint=$("skiphint"), toastEl=$("toast");
 const reduceMotion=window.matchMedia("(prefers-reduced-motion:reduce)").matches;
-let typing=false, typeTimer=null, finishType=null, currentNode=null, currentNodeId=null;
+let typing=false, typeTimer=null, finishType=null, currentNode=null, currentNodeId=null, currentStoryId="vault73_longwalk";
 
 function toast(msg){
   toastEl.textContent=msg; toastEl.classList.add("show");
@@ -1383,10 +1383,11 @@ function navigate(c){
 const TERMINAL={death:1, raddeath:1, ending_hub:1};
 function render(id){
   const node=NODES[id]; currentNode=node; currentNodeId=id;
+  if(NODE_STORY[id]) currentStoryId=NODE_STORY[id];
   // run node-level effect once per entry to this node
   if(node.effect && !state.flags["_e_"+id]){ state.flags["_e_"+id]=true; node.effect(); }
   // keep the Pip-Boy button correct (important after loading a save)
-  $("pipOpen").disabled = !state.flags.hasPipboy;
+  $("pipOpen").disabled = false;
   renderHUD();
   crumbEl.textContent=node.crumb;
   choicesEl.innerHTML="";
@@ -1413,11 +1414,59 @@ You sink down in the hot dust. The Saltpan glitters, beautiful and patient, and 
   choices:[] };
 
 /* =====================================================================
-   PIP-BOY OVERLAY
+   MODULAR STORY REGISTRY
+   The engine above never needs to change. A "story" is a continuous saga
+   (e.g. Vault 73). It's built from one or more chapters. Each chapter is a
+   self-contained module of nodes (+ optional items) that plugs in here.
+     • Same storyId  = same continuous save (Chapter 1 → 2 → 3...).
+     • New storyId   = a separate story with its own save slot.
    ===================================================================== */
-const pip=$("pip"), pipBody=$("pipBody");
+const STORIES=[];          // registered chapter modules (metadata)
+const NODE_STORY={};        // nodeId -> storyId, so the engine knows where you are
+function registerChapter(c){
+  if(c.items) Object.assign(ITEMS, c.items);     // merge chapter items into the shared DB
+  if(c.nodes) Object.assign(NODES, c.nodes);     // merge chapter scenes into the runtime map
+  const ids = c.nodes ? Object.keys(c.nodes) : (c.nodeIds||[]);
+  ids.forEach(id=>{ if(!NODE_STORY[id]) NODE_STORY[id]=c.storyId; });
+  STORIES.push({ storyId:c.storyId, chapter:c.chapter||1, title:c.title||c.storyId,
+                 start:c.start, order:(c.order!=null?c.order:STORIES.length) });
+}
+const storyOf = id => NODE_STORY[id] || DEFAULT_STORY;
+const startOf = storyId => { const s=STORIES.find(x=>x.storyId===storyId); return s?s.start:"intro"; };
+
+const DEFAULT_STORY = "vault73_longwalk";
+/* Chapter One claims every scene already defined above. */
+registerChapter({
+  storyId: DEFAULT_STORY, chapter:1, title:"Vault 73: The Long Walk Home",
+  start:"intro", nodeIds:Object.keys(NODES)
+});
+
+/* ---------------------------------------------------------------------
+   HOW TO ADD A CHAPTER (or a whole new story) — copy this pattern:
+
+   registerChapter({
+     storyId: "vault73_longwalk",   // same id keeps one continuous save
+     chapter: 2,
+     title:   "Vault 73: The Long Walk Home",
+     start:   "ch2_intro",
+     items: {                        // optional: new gear this chapter introduces
+       laser_pistol:{name:"Laser Pistol",cat:"weapon",kind:"gun",dmg:26,ammo:"ammo_ec",size:2,desc:"..."},
+     },
+     nodes: {                        // the new scenes
+       ch2_intro:{ crumb:"...", text:`...`, choices:[ {key:"1",label:"...",to:"ch2_next"} ] },
+       // ...
+     }
+   });
+   Then point Chapter One onward — e.g. give an ending choice { to:"ch2_intro" }.
+   For a brand-new, unrelated story, use a fresh storyId (e.g. "vault12_echoes")
+   and it gets its own save slot automatically.
+   --------------------------------------------------------------------- */
+
 let activeTab="stat";
-function openPip(){ pip.classList.add("open"); pip.setAttribute("aria-hidden","false"); renderPip(); }
+function openPip(){
+  if(!state.flags.hasPipboy){ activeTab="data"; document.querySelectorAll(".pip-tab").forEach(x=>x.classList.toggle("active", x.dataset.tab==="data")); }
+  pip.classList.add("open"); pip.setAttribute("aria-hidden","false"); renderPip();
+}
 function closePip(){ pip.classList.remove("open"); pip.setAttribute("aria-hidden","true"); }
 $("pipOpen").addEventListener("click",openPip);
 $("pipClose").addEventListener("click",closePip);
@@ -1434,6 +1483,10 @@ function renderPip(){
 }
 
 function renderStat(){
+  if(!state.flags.hasPipboy){
+    pipBody.innerHTML=`<div class="empty" style="padding:16px 8px;font-size:14px;line-height:1.7">Your Pip-Boy 3000 boots up when Overseer Wynn issues it at the vault door. Your vitals and S.P.E.C.I.A.L. appear here then — shaped by the choices of your last day in the vault.<br><br>Your save and transfer tools are ready now under <b style="color:var(--green)">DATA</b>.</div>`;
+    return;
+  }
   const s=state;
   const def = s.wornApparel?ITEMS[s.wornApparel].def:0;
   const wn = s.equippedWeapon?ITEMS[s.equippedWeapon].name:"Unarmed";
@@ -1457,9 +1510,13 @@ function renderStat(){
 }
 
 function renderInv(){
+  if(!state.flags.hasPipboy){
+    pipBody.innerHTML=`<div class="empty" style="padding:16px 8px;font-size:14px;line-height:1.7">No pack yet. Your Pip-Boy starts tracking your gear once you're issued it and a field pack at the vault door.<br><br>Save and transfer tools are under <b style="color:var(--green)">DATA</b>.</div>`;
+    return;
+  }
   const cap=capCount(), used=usedSlots();
   let html="";
-  if(!state.pack){
+  if(!state.pack || !ITEMS[state.pack]){
     html+=`<div class="packline">NO PACK — POCKETS ONLY</div>`;
   } else {
     html+=`<div class="packline">${ITEMS[state.pack].name.toUpperCase()}</div>`;
@@ -1470,7 +1527,7 @@ function renderInv(){
 
   const cats=[["weapon","Weapons"],["apparel","Apparel"],["aid","Aid"],["food","Food & Drink"],["ammo","Ammo"],["misc","Keepsakes"],["pack","Packs"]];
   for(const [cat,label] of cats){
-    const ids=Object.keys(state.inv).filter(id=>state.inv[id]>0 && ITEMS[id].cat===cat);
+    const ids=Object.keys(state.inv).filter(id=>state.inv[id]>0 && ITEMS[id] && ITEMS[id].cat===cat);
     if(cat==="pack"){ // only show active pack
       if(!state.pack) continue;
     }
@@ -1517,15 +1574,26 @@ function renderData(){
       const hearts = b>=5?"●●●":b>=3?"●●○":b>=1?"●○○":"○○○";
       return `<div class="logentry"><b>${name}</b> &nbsp;<span style="color:var(--warn)">${hearts}</span><br><span style="color:var(--dim)">${line}</span></div>`;
     };
-    html+=tie("Robin","robin","Your best friend since the nursery. Borrowed you a 10mm and a promise to drag you home.");
-    html+=tie("Cass","cass","The one you love. Hydroponics dreamer. Waiting under a painted sky for the real one.");
-    html+=tie("Sam","sam","Your younger sibling. Lent you their lucky cap. The rule is you bring it back.");
+    html+=tie("Dax","robin","Your best friend since the nursery. Borrowed you a 10mm and a promise to drag you home.");
+    html+=tie("Cassara","cass","The one you love — Cass, to you. Hydroponics dreamer, waiting under a painted sky for the real one.");
+    html+=tie("Lark","sam","Your kid sister. Lent you her lucky cap. The rule is you bring it back.");
   }
   html+=`<div class="secthead">Quest Log & Journal</div>`;
   if(state.log.length===0){ html+=`<div class="empty">No entries yet. Your story is just beginning.</div>`; }
   else state.log.forEach(e=>{ html+=`<div class="logentry">› ${e}</div>`; });
 
   html+=`<div class="secthead">Cloud Sync</div>${cloudStatusHTML()}`;
+
+  html+=`<div class="secthead">Transfer (save code)</div>
+    <div style="font-size:13px;color:var(--dim);line-height:1.6;margin-bottom:8px">
+      Move <i>this exact run</i> to any device — your phone, a laptop, your hosted copy. Export a code here, paste it there. Works everywhere, even to carry this run out of Claude.</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="iact" id="expBtn">EXPORT SAVE CODE</button>
+      <button class="iact" id="impBtn">PASTE A CODE</button>
+    </div>
+    <textarea id="codeBox" spellcheck="false" placeholder=""
+      style="display:none;width:100%;height:68px;margin-top:8px;background:rgba(54,255,126,.06);border:1px solid var(--dim);color:var(--bright);font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.4;padding:8px;border-radius:5px;resize:vertical"></textarea>
+    <div id="impRow" style="display:none;margin-top:6px"><button class="iact" id="impLoad">LOAD THIS CODE</button></div>`;
 
   html+=`<div class="secthead">This Device</div>
     <div style="font-size:13px;color:var(--dim);line-height:1.6;margin-bottom:8px">
@@ -1541,6 +1609,26 @@ function renderData(){
   if(ms) ms.addEventListener("click", async ()=>{ const ok=await saveGame(); toast(ok?(cloud.user?"SAVED · SYNCED":"PROGRESS SAVED"):"SAVE UNAVAILABLE HERE"); });
   const eb=document.getElementById("eraseBtn");
   if(eb) eb.addEventListener("click", async ()=>{ await eraseSave(); closePip(); start(); });
+
+  const box=document.getElementById("codeBox"), impRow=document.getElementById("impRow");
+  const exp=document.getElementById("expBtn"), imp=document.getElementById("impBtn"), impL=document.getElementById("impLoad");
+  if(exp) exp.addEventListener("click", ()=>{
+    const code=makeSaveCode();
+    if(!code){ toast("NOTHING TO EXPORT YET"); return; }
+    box.style.display="block"; impRow.style.display="none"; box.readOnly=true; box.value=code;
+    box.focus(); box.select();
+    if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(code).then(()=>toast("CODE COPIED")).catch(()=>toast("CODE READY — SELECT & COPY")); }
+    else toast("CODE READY — SELECT & COPY");
+  });
+  if(imp) imp.addEventListener("click", ()=>{
+    box.style.display="block"; box.readOnly=false; box.value=""; box.placeholder="Paste your save code here, then press Load.";
+    impRow.style.display="block"; box.focus();
+  });
+  if(impL) impL.addEventListener("click", ()=>{
+    const parsed=readSaveCode(box.value);
+    if(parsed&&parsed.state&&parsed.node){ resumeGame(parsed); toast("SAVE CODE LOADED"); }
+    else toast("THAT CODE DIDN'T READ — CHECK IT COPIED IN FULL");
+  });
 }
 
 /* =====================================================================
@@ -1606,65 +1694,93 @@ function authErr(e){
 }
 async function cloudSave(payload){
   if(!cloud.user) return false;
-  try{ await cloud.api.setDoc(cloud.api.doc(cloud.db,"saves",cloud.user.uid),{data:JSON.stringify(payload),updated:Date.now()}); return true; }
-  catch(e){ return false; }
+  try{
+    await cloud.api.setDoc(cloud.api.doc(cloud.db,"saves",cloud.user.uid),
+      { ["s_"+payload.story]: JSON.stringify(payload), active: payload.story, updated:Date.now() },
+      { merge:true });
+    return true;
+  }catch(e){ return false; }
 }
-async function cloudLoad(){
+async function cloudLoad(storyId){
   if(!cloud.user) return null;
-  try{ const s=await cloud.api.getDoc(cloud.api.doc(cloud.db,"saves",cloud.user.uid));
-       if(s.exists()){ const d=s.data(); return d.data?JSON.parse(d.data):null; } return null; }
-  catch(e){ return null; }
-}
-
-/* ---- local store (window.storage in Claude, else localStorage) ---- */
-const SAVE_KEY="vault73_save";
-const inClaude = (typeof window!=="undefined" && window.storage);
-function localPut(payload){
   try{
-    if(inClaude){ window.storage.set(SAVE_KEY, JSON.stringify(payload), false).catch(()=>{}); return; }
-    localStorage.setItem(SAVE_KEY, JSON.stringify(payload));
-  }catch(e){}
-}
-async function localGet(){
-  try{
-    if(inClaude){ const r=await window.storage.get(SAVE_KEY,false); return (r&&r.value)?JSON.parse(r.value):null; }
-    const v=localStorage.getItem(SAVE_KEY); return v?JSON.parse(v):null;
+    const s=await cloud.api.getDoc(cloud.api.doc(cloud.db,"saves",cloud.user.uid));
+    if(!s.exists()) return null;
+    const d=s.data();
+    const sid = storyId || d.active || DEFAULT_STORY;
+    const raw = d["s_"+sid];
+    return raw ? JSON.parse(raw) : null;
   }catch(e){ return null; }
 }
-function localClear(){
-  try{
-    if(inClaude){ window.storage.delete(SAVE_KEY,false).catch(()=>{}); return; }
-    localStorage.removeItem(SAVE_KEY);
-  }catch(e){}
+
+/* ---- local store (window.storage in Claude, else localStorage); per-story slots ---- */
+const SAVE_PREFIX="vault73_save_";
+const ACTIVE_KEY="vault73_active";
+const inClaude = (typeof window!=="undefined" && window.storage);
+function lput(key,val){ try{ if(inClaude){ window.storage.set(key,val,false).catch(()=>{}); } else localStorage.setItem(key,val); }catch(e){} }
+async function lget(key){ try{ if(inClaude){ const r=await window.storage.get(key,false); return (r&&r.value)?r.value:null; } return localStorage.getItem(key); }catch(e){ return null; } }
+function ldel(key){ try{ if(inClaude){ window.storage.delete(key,false).catch(()=>{}); } else localStorage.removeItem(key); }catch(e){} }
+
+function localPut(payload){ lput(SAVE_PREFIX+payload.story, JSON.stringify(payload)); lput(ACTIVE_KEY, payload.story); }
+async function localGet(storyId){
+  const sid = storyId || (await lget(ACTIVE_KEY)) || DEFAULT_STORY;
+  const v = await lget(SAVE_PREFIX+sid);
+  try{ return v?JSON.parse(v):null; }catch(e){ return null; }
+}
+function localClear(storyId){ ldel(SAVE_PREFIX+(storyId||currentStoryId)); }
+
+/* ---- migration: keeps older saves loading as new chapters/fields arrive ---- */
+function migrate(saved){
+  if(!saved || !saved.state) return saved;
+  const fresh = freshState();
+  const st = Object.assign({}, fresh, saved.state);        // fill any new top-level fields with defaults
+  st.sp = Object.assign({}, fresh.sp, saved.state.sp||{}); // ensure every S.P.E.C.I.A.L. key exists
+  st.bonds = Object.assign({}, fresh.bonds, saved.state.bonds||{});
+  st.inv = saved.state.inv || {};
+  st.flags = saved.state.flags || {};
+  st.log = saved.state.log || [];
+  return { v:2, story: saved.story || DEFAULT_STORY, node: saved.node, state: st, erased: saved.erased };
 }
 
 /* ---- unified API used by the game ---- */
 async function saveGame(){
-  const payload={ v:1, node:currentNodeId, state };
-  localPut(payload);              // always keep a local cache
+  const payload={ v:2, story:currentStoryId, node:currentNodeId, state };
+  localPut(payload);
   if(cloud.user) cloudSave(payload);
   return true;
 }
 async function loadGame(){
-  if(cloud.user){ const c=await cloudLoad(); if(c) return c; }
-  return await localGet();
+  if(cloud.user){ const c=await cloudLoad(); if(c) return migrate(c); }
+  const l=await localGet(); return l?migrate(l):null;
 }
+function makeSaveCode(){
+  try{ return "V73-"+btoa(unescape(encodeURIComponent(JSON.stringify({v:2,story:currentStoryId,node:currentNodeId,state})))); }
+  catch(e){ return ""; }
+}
+function readSaveCode(code){
+  try{ return migrate(JSON.parse(decodeURIComponent(escape(atob(String(code).replace(/^V73-/,"").replace(/\s+/g,"")))))); }
+  catch(e){ return null; }
+}
+
 async function eraseSave(){
-  localClear();
-  if(cloud.user) cloudSave({v:1,node:"intro",state:freshState(),erased:true});
+  localClear(currentStoryId);
+  if(cloud.user) cloudSave({v:2,story:currentStoryId,node:"intro",state:freshState(),erased:true});
 }
 
 function resumeGame(saved){
+  saved = migrate(saved);
   state = saved.state;
-  if(!state.bonds) state.bonds={robin:0,cass:0,sam:0};
+  currentStoryId = saved.story || DEFAULT_STORY;
   closePip();
-  render(saved.node && NODES[saved.node] ? saved.node : "intro");
+  render(saved.node && NODES[saved.node] ? saved.node : startOf(currentStoryId));
 }
 
 function showContinuePrompt(saved){
+  saved = migrate(saved);
   state = saved.state;
-  if(!state.bonds) state.bonds={robin:0,cass:0,sam:0};
-  $("pipOpen").disabled = !state.flags.hasPipboy;
+  currentStoryId = saved.story || DEFAULT_STORY;
+  currentNodeId = saved.node;
+  $("pipOpen").disabled = false;
   renderHUD();
   closePip();
   currentNode=null;
@@ -1713,14 +1829,14 @@ function wireCloudUI(){
   if(g("cSignin")) g("cSignin").addEventListener("click", async()=>{ try{ await cloud.api.signInWithEmailAndPassword(cloud.auth,em(),pw()); toast("SIGNED IN"); }catch(e){ toast(authErr(e)); } });
   if(g("cSignup")) g("cSignup").addEventListener("click", async()=>{ try{ await cloud.api.createUserWithEmailAndPassword(cloud.auth,em(),pw()); toast("ACCOUNT CREATED · UPLOAD YOUR RUN"); }catch(e){ toast(authErr(e)); } });
   if(g("cOut"))    g("cOut").addEventListener("click", async()=>{ try{ await cloud.api.signOut(cloud.auth); toast("SIGNED OUT"); }catch(e){} });
-  if(g("cPush"))   g("cPush").addEventListener("click", async()=>{ const ok=await cloudSave({v:1,node:currentNodeId,state}); toast(ok?"UPLOADED TO CLOUD":"UPLOAD FAILED"); });
+  if(g("cPush"))   g("cPush").addEventListener("click", async()=>{ const ok=await cloudSave({v:2,story:currentStoryId,node:currentNodeId,state}); toast(ok?"UPLOADED TO CLOUD":"UPLOAD FAILED"); });
   if(g("cPull"))   g("cPull").addEventListener("click", async()=>{ const c=await cloudLoad(); if(c&&c.state&&c.node){ resumeGame(c); toast("CLOUD SAVE LOADED"); } else toast("NO CLOUD SAVE YET"); });
 }
 function updateCloudUI(){ if(pip.classList.contains("open") && activeTab==="data") renderData(); }
 
 function start(){
   state=freshState();
-  $("pipOpen").disabled=true;
+  $("pipOpen").disabled=false;
   closePip();
   render("intro");
 }
