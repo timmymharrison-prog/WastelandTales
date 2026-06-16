@@ -1,4 +1,11 @@
 <!-- VAULT 73: THE LONG WALK HOME — a Fallout fan-fiction gamebook -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#02160b">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Wasteland Tales">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=VT323&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -16,7 +23,7 @@
     --line:rgba(54,255,126,.18);
   }
   *{box-sizing:border-box;}
-  html,body{margin:0;height:100%;background:#000;}
+  html,body{margin:0;height:100%;background:#000;-webkit-text-size-adjust:100%;text-size-adjust:100%;overscroll-behavior:none;}
   body{
     font-family:"JetBrains Mono",ui-monospace,monospace;color:var(--green);
     display:flex;align-items:center;justify-content:center;padding:14px;min-height:100%;
@@ -147,11 +154,60 @@
   .logentry{font-size:14px;line-height:1.6;padding:6px 0;border-bottom:1px dotted var(--line);}
   .logentry b{color:var(--bright);font-weight:500;}
 
+  /* momentum scrolling on the two scroll regions */
+  .screen, .pip-body{ -webkit-overflow-scrolling:touch; }
+  /* kill tap-delay / accidental double-tap zoom on controls */
+  .choice,.pip-btn,.pip-tab,.iact,.item .iact{ touch-action:manipulation; }
+
+  /* ============ MOBILE: the phone becomes the Pip-Boy ============ */
+  @media (max-width:640px){
+    body{ padding:0; align-items:stretch; justify-content:stretch; background:var(--screen-edge); }
+    .monitor{
+      width:100%; max-width:none; height:100vh; height:100dvh;
+      border-radius:0;
+      padding:
+        calc(10px + env(safe-area-inset-top)) calc(15px + env(safe-area-inset-right))
+        calc(8px + env(safe-area-inset-bottom)) calc(15px + env(safe-area-inset-left));
+      box-shadow:inset 0 0 120px rgba(0,0,0,.7),inset 0 0 26px rgba(54,255,126,.05);
+    }
+    .monitor::before,.monitor::after{ border-radius:0; }
+    .pip{ border-radius:0; padding:
+      calc(18px + env(safe-area-inset-top)) calc(18px + env(safe-area-inset-right))
+      calc(16px + env(safe-area-inset-bottom)) calc(18px + env(safe-area-inset-left)); }
+
+    .hud{ font-size:18px; gap:9px; padding-bottom:9px; margin-bottom:10px; }
+    .meter{ width:54px; height:12px; }
+    .tag{ font-size:17px; }
+    .pip-btn{ font-size:18px; padding:4px 10px; }
+    .crumb{ font-size:16px; }
+    .prose{ font-size:16px; line-height:1.75; }
+
+    /* roomy, obviously-tappable choices */
+    .choices{ padding-top:10px; }
+    .choice{ font-size:19px; padding:13px 13px; margin:5px 0; line-height:1.3; }
+    .choice .k{ margin-right:12px; }
+
+    .pip-tabs{ font-size:20px; }
+    .pip-tab{ padding:6px 14px; }
+    .special-grid{ grid-template-columns:repeat(4,1fr); }
+    .iact{ font-size:17px; padding:6px 12px; min-height:38px; }
+    .item{ flex-wrap:wrap; padding:9px 8px; }
+    .item .iname{ flex:1 1 100%; margin-bottom:4px; }
+    .toast{ bottom:calc(84px + env(safe-area-inset-bottom)); font-size:18px; }
+  }
+
+  /* ===== touch devices (no hover): give choices a real button look ===== */
+  @media (hover:none){
+    .choice{ border-color:var(--line); background:rgba(54,255,126,.05); border-radius:7px; }
+    .choice .k{ color:var(--green); }
+    .choice:active{ background:rgba(54,255,126,.20); border-color:var(--dim); color:var(--bright); }
+    .choice.locked, .choice.locked:active{ background:transparent; border-color:transparent; }
+    .pip-btn:active,.pip-tab:active,.iact:active{ background:rgba(54,255,126,.22); }
+    .hud,.choices,.pip-tabs,.choice,.pip-btn,.pip-tab,.iact{ -webkit-touch-callout:none; -webkit-user-select:none; user-select:none; }
+    #codeBox, .prose{ -webkit-user-select:text; user-select:text; }
+  }
+
   @media (max-width:560px){
-    .monitor{padding:18px 16px;height:92vh;}
-    .hud{font-size:18px;gap:10px;}
-    .meter{width:62px;}
-    .prose{font-size:15px;}
     .special-grid{grid-template-columns:repeat(4,1fr);}
   }
   @media (prefers-reduced-motion:reduce){
@@ -1464,7 +1520,6 @@ registerChapter({
 
 let activeTab="stat";
 function openPip(){
-  if(!state.flags.hasPipboy){ activeTab="data"; document.querySelectorAll(".pip-tab").forEach(x=>x.classList.toggle("active", x.dataset.tab==="data")); }
   pip.classList.add("open"); pip.setAttribute("aria-hidden","false"); renderPip();
 }
 function closePip(){ pip.classList.remove("open"); pip.setAttribute("aria-hidden","true"); }
