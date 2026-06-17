@@ -1,4 +1,4 @@
-<!-- VAULT 73: THE LONG WALK HOME — a Fallout fan-fiction gamebook -->
+<!-- VAULT 27: THE LONG WALK HOME — a Fallout fan-fiction gamebook -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#02160b">
@@ -236,7 +236,7 @@
         <circle cx="10" cy="6" r="3.4" stroke="currentColor" stroke-width="1.4"/>
         <path d="M3.5 20c0-4.2 2.9-7 6.5-7s6.5 2.8 6.5 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
       </svg>
-      <span class="who" id="charName">VAULT 73</span>
+      <span class="who" id="charName">VAULT 27</span>
     </span>
     <span class="bar"><span class="tag">HP</span><span class="meter" id="hpMeter"></span></span>
     <span class="bar"><span class="tag">RAD</span><span class="meter rads" id="radMeter"></span></span>
@@ -245,7 +245,7 @@
   </div>
 
   <div class="screen" id="screen">
-    <div class="crumb" id="crumb">VAULT 73 — RECLAMATION CONTROL</div>
+    <div class="crumb" id="crumb">VAULT 27 — RECLAMATION CONTROL</div>
     <div class="prose" id="prose"></div>
   </div>
 
@@ -268,7 +268,7 @@
 
 <script>
 /* =====================================================================
-   VAULT 73: THE LONG WALK HOME
+   VAULT 27: THE LONG WALK HOME
    A Fallout fan-fiction gamebook. Original characters & locations set
    within the established Fallout universe. Mojave region, year 2284.
    ===================================================================== */
@@ -276,7 +276,7 @@
 /* ---------------------- ITEM DATABASE ---------------------- */
 const ITEMS = {
   // apparel
-  vaultsuit:{name:"Vault 73 Jumpsuit",cat:"apparel",def:3,size:1,desc:"Snug, blue, and absurdly clean for the wasteland."},
+  vaultsuit:{name:"Vault 27 Jumpsuit",cat:"apparel",def:3,size:1,desc:"Snug, blue, and absurdly clean for the wasteland."},
   leather_armor:{name:"Leather Armor",cat:"apparel",def:12,size:2,desc:"Riveted hide over the shoulders. Smells of old smoke."},
   reinforced_jacket:{name:"Reinforced Trail Jacket",cat:"apparel",def:18,size:2,desc:"Caravan-grade. Plates sewn into the lining."},
   // weapons
@@ -299,9 +299,9 @@ const ITEMS = {
   satchel:{name:"Leather Satchel",cat:"pack",capacity:6,size:0,desc:"A dead wanderer's shoulder bag. Six slots."},
   rucksack:{name:"Trail Rucksack",cat:"pack",capacity:12,size:0,desc:"Frame-and-canvas caravan pack. Twelve slots."},
   // act one
-  vault_field_pack:{name:"Vault 73 Field Pack",cat:"pack",capacity:6,size:0,desc:"A small issue pack from the vault stores. Six slots — all they could spare."},
-  vault_wrench:{name:"Vault 73 Wrench",cat:"weapon",kind:"melee",dmg:13,size:1,desc:"Your wrench. You know its weight better than your own hand."},
-  sams_cap:{name:"Lark's Lucky Cap",cat:"misc",size:0,desc:"A scuffed bottle cap your kid sister pressed into your palm. \"So you remember to come back.\""},
+  vault_field_pack:{name:"Vault 27 Field Pack",cat:"pack",capacity:6,size:0,desc:"A small issue pack from the vault stores. Six slots — all they could spare."},
+  vault_wrench:{name:"Vault 27 Wrench",cat:"weapon",kind:"melee",dmg:13,size:1,desc:"Your wrench. You know its weight better than your own hand."},
+  sams_cap:{name:"Dottie's Lucky Cap",cat:"misc",size:0,desc:"A scuffed bottle cap your kid sister pressed into your palm. \"So you remember to come back.\""},
   cass_locket:{name:"Cass's Photo",cat:"misc",size:0,desc:"A cracked photo of the two of you by the hydroponics lights. Worth more than caps."},
 };
 const SPECIAL_NAMES={S:"STRENGTH",P:"PERCEPTION",E:"ENDURANCE",C:"CHARISMA",I:"INTELLIGENCE",A:"AGILITY",L:"LUCK"};
@@ -314,8 +314,10 @@ function freshState(){
     hp:100, maxHp:100, rads:0, caps:0,
     sp:{S:4,P:4,E:4,C:4,I:4,A:4,L:4},   // grows through the choices of your last ordinary day
     bonds:{robin:0,cass:0,sam:0},
+    dwellerName:"Diego",            // what people in the vault call you (chosen at the morning prompt)
     inv:{}, equippedWeapon:null, wornApparel:null, pack:null,
     flags:{}, log:[],
+    history:[],   // read-only journal of the last 5 scenes: {crumb,text,choiceLabel}
   };
 }
 
@@ -398,22 +400,56 @@ const NODES = {
 
 /* ================= ACT ONE: THE LAST ORDINARY DAY ================= */
 intro:{
-  crumb:"VAULT 73 · RESIDENTIAL · 06:14",
+  crumb:"VAULT 27 · RESIDENTIAL · 06:14",
   text:
 `You wake the way you always do — to the hum. Two hundred years of unbroken machine-breath in the walls, so constant you only notice it in dreams, where the world is silent and wrong.
 
-Then you notice the other thing: a weight on your legs and a grin three inches from your face. Lark, your younger sister, has climbed onto your bunk to wake you the way she's done since she could walk.
+Then you notice the other thing: a weight on your legs and a grin three inches from your face. Dottie, your younger sister, has climbed onto your bunk to wake you the way she's done since she could walk.
 
-<span class="say">"You're late, you're late, you slept through the bell,"</span> Lark announces, delighted. <span class="say">"Dax already went down. And the shower on our level's doing the spitty thing again — Mr. Okafor was cussing about it. Third time this week!"</span> She flops back dramatically. <span class="say">"Everybody says you're the only one who can fix anything. So fix the water before it gets weird, okay? It's getting weird."</span>
+<span class="say">"You're late, you're late, you slept through the bell,"</span> Dottie announces, delighted. <span class="say">"Dax already went down. And the shower on our level's doing the spitty thing again — Mr. Okafor was cussing about it. Third time this week!"</span> She flops back dramatically. <span class="say">"Everybody says you're the only one who can fix anything. So fix the water before it gets weird, okay? It's getting weird."</span>
 
-You're the vault's utility tech — the one they send when a door won't seal or a pump skips a beat. Around here they call you Sparks. It's a small life, three hundred meters of steel and a sky painted on the cafeteria ceiling. But it's yours, and the people in it are yours, and this morning that feels like enough.`,
+The Pip-Boy on the shelf chirps its morning sync and reads your file aloud the way it does every dawn, in its small clipped vault-system voice: <span class="ok">"Diego Orr. Born 2256. Vault 27 utility tech."</span>
+
+You're the one they send when a door won't seal or a pump skips a beat. It's a small life, three hundred meters of steel and a sky painted on the cafeteria ceiling. But it's yours, and the people in it are yours, and this morning that feels like enough.`,
+  choices:[
+    { key:"1", label:"(Continue)", to:"naming" },
+  ]
+},
+
+naming:{
+  crumb:"VAULT 27 · RESIDENTIAL · 06:15",
+  text:
+`Dottie is still bouncing on your legs. The Pip-Boy's read-out fades out. The vault knows you as Diego Orr — that's what's on every file, every roster, every door log going back to the day you were born.
+
+But out in the corridors, where people have known you all your life — what do they actually *call* you?`,
+  choices:[
+    { key:"1", label:"\"Wrench.\" The crew name. Earned by the work — you fix things, that's what you are.",
+      to:"a_morning_choices", effect:chain(()=>{ state.dwellerName="Wrench"; },
+        logIt("On the maintenance crew and around the vault, they call you <b>Wrench</b>.")) },
+    { key:"2", label:"\"Steady.\" The character name. Earned over years — your hands don't shake when others' do.",
+      to:"a_morning_choices", effect:chain(()=>{ state.dwellerName="Steady"; },
+        logIt("Around the vault, they call you <b>Steady</b> — for the hands that don't shake.")) },
+    { key:"3", label:"\"Orr.\" Just your last name, said the way close family says it. The intimate one.",
+      to:"a_morning_choices", effect:chain(()=>{ state.dwellerName="Orr"; },
+        logIt("To the people closest to you, you're just <b>Orr</b>.")) },
+    { key:"4", label:"\"Diego.\" That's enough. No nickname; the name your mother gave you does the work.",
+      to:"a_morning_choices", effect:chain(()=>{ state.dwellerName="Diego"; },
+        logIt("No vault-nickname. To everyone you love, you're just <b>Diego</b>.")) },
+  ]
+},
+
+a_morning_choices:{
+  crumb:"VAULT 27 · RESIDENTIAL · 06:16",
+  text:()=>`Dottie elbows you in the ribs. <span class="say">"${state.dwellerName}. Up. Now."</span>
+
+You have about ten minutes before shift bell.`,
   choices:[
     { key:"1", label:"Pull the shower regulator apart before shift — that \"spitty thing\" is bugging you.",
       to:"a_mess", effect:chain(sp("I",1), sp("P",1), flag("noticed_water"),
         logIt("Morning: you tore into the level's water regulator before shift. Pressure's down — and it's not the regulator.")) },
-    { key:"2", label:"Race Lark down to the mess and let her win by a hair.",
+    { key:"2", label:"Race Dottie down to the mess and let her win by a hair.",
       to:"a_mess", effect:chain(sp("A",1), bond("sam",1),
-        logIt("Morning: raced Lark to the mess and let her win. Her laugh is the best sound in the vault.")) },
+        logIt("Morning: raced Dottie to the mess and let her win. Her laugh is the best sound in the vault.")) },
     { key:"3", label:"Knock out your morning lifting set first — old habit, keeps you steady.",
       to:"a_mess", effect:chain(sp("S",1), sp("E",1),
         logIt("Morning: got your lifting set in before shift, same as every day.")) },
@@ -421,11 +457,11 @@ You're the vault's utility tech — the one they send when a door won't seal or 
 },
 
 a_mess:{
-  crumb:"VAULT 73 · MESS HALL · 06:40",
-  text:
+  crumb:"VAULT 27 · MESS HALL · 06:40",
+  text:()=>
 `The mess smells of reconstituted eggs and chlorine. Dax's already at your usual table, boots up on a chair, holding it for you the way he has since you were both eight and the bigger kids ran the cafeteria.
 
-<span class="say">"There's Sparks,"</span> Dax says, kicking the chair out for you. <span class="say">"You hear? Pressure's down on three levels now, not just ours. Maintenance is 'monitoring it.'"</span> He makes air-quotes with a fork. <span class="say">"Which is maintenance for 'we have no idea.' Tell me you have an idea. You always have an idea."</span>
+<span class="say">"There's ${state.dwellerName},"</span> Dax says, kicking the chair out for you. <span class="say">"You hear? Pressure's down on three levels now, not just ours. Maintenance is 'monitoring it.'"</span> He makes air-quotes with a fork. <span class="say">"Which is maintenance for 'we have no idea.' Tell me you have an idea. You always have an idea."</span>
 
 Down the table, old Okafor grumbles that in his grandmother's day the taps never so much as hiccuped, and a couple of the younger dwellers go quiet, the way people do when a small worry starts looking for somewhere to grow.`,
   choices:[
@@ -442,11 +478,11 @@ Down the table, old Okafor grumbles that in his grandmother's day the taps never
 },
 
 a_servo:{
-  crumb:"VAULT 73 · SECTOR 2 · 09:20",
-  text:
+  crumb:"VAULT 27 · SECTOR 2 · 09:20",
+  text:()=>
 `Your shift board lights up before you've finished your coffee: blast door 2-C is jammed half-open, and the maintenance lift is down, so it's a walk. Overseer Wynn catches you in the corridor on her way somewhere with a thick stack of printouts and a thin, tired smile.
 
-<span class="say">"Sparks. Good. The door, when you get a moment — we can't seal Sector 2 with it gaping."</span> She hesitates, like she might say more, then doesn't. <span class="say">"...Thank you. For always saying yes."</span> And she's gone, walking fast, clutching those printouts a little too tightly.
+<span class="say">"${state.dwellerName}. Good. The door, when you get a moment — we can't seal Sector 2 with it gaping."</span> She hesitates, like she might say more, then doesn't. <span class="say">"...Thank you. For always saying yes."</span> And she's gone, walking fast, clutching those printouts a little too tightly.
 
 The door's a half-ton of stuck steel with a fried servo. You crouch in front of it. How you handle a stuck thing says a lot about a person, your old mentor used to say.`,
   choices:[
@@ -461,13 +497,13 @@ The door's a half-ton of stuck steel with a fried servo. You crouch in front of 
 },
 
 a_clinic:{
-  crumb:"VAULT 73 · CLINIC · 11:05",
-  text:
+  crumb:"VAULT 27 · CLINIC · 11:05",
+  text:()=>
 `You're rerouting cable past the clinic when a cry pulls you in. A dweller's gone down in the waiting area — sweating, grey, breathing wrong. The clinic is hot, far too hot; the air recyclers run off the same water loop as everything else, and that loop is sick.
 
 And there, already kneeling by the fallen man with a cool cloth and steady hands, is Cassara — Cass, to you.
 
-You two have been something more than friends for a year now, careful and quiet about it the way the vault makes you be. Cass looks up, and the worry in her eyes isn't just for the patient. <span class="say">"It's the heat,"</span> she says. <span class="say">"Third one today. The recyclers can't keep up, and the doctor won't say why out loud."</span> She lowers her voice so only you can hear. <span class="say">"But you know why. Don't you, Sparks."</span>`,
+You two have been something more than friends for a year now, careful and quiet about it the way the vault makes you be. Cass looks up, and the worry in her eyes isn't just for the patient. <span class="say">"It's the heat,"</span> she says. <span class="say">"Third one today. The recyclers can't keep up, and the doctor won't say why out loud."</span> She lowers her voice so only you can hear. <span class="say">"But you know why. Don't you, ${state.dwellerName}."</span>`,
   choices:[
     { key:"1", label:"Read the man's symptoms and call the treatment before the doctor does.",
       to:"a_cass", effect:chain(sp("I",1), sp("P",1), logIt("Diagnosed the collapsed dweller in the clinic — heat exhaustion from the failing cooling loop.")) },
@@ -480,7 +516,7 @@ You two have been something more than friends for a year now, careful and quiet 
 
 
 a_cass:{
-  crumb:"VAULT 73 · HYDROPONICS · 13:30",
+  crumb:"VAULT 27 · HYDROPONICS · 13:30",
   text:
 `The crisis passes; the man will be fine. Cass catches your sleeve and pulls you into the hydroponics bay, where the grow-lights make a private little dusk among the bean rows. For a moment it's just the two of you and the green smell and the hum.
 
@@ -503,11 +539,11 @@ You tell them what your gut already knows: the intake's failing, the pump's stra
 },
 
 a_pump:{
-  crumb:"VAULT 73 · RECLAMATION LEVEL · 15:48",
+  crumb:"VAULT 27 · RECLAMATION LEVEL · 15:48",
   text:
 `The alarm finds you in the corridor — not the soft chime of a fault, but the deep, full-throated klaxon the vault was built to dread. The aquifer alarm. In two hundred and seven years it has never once sounded for real.
 
-You're the first tech to the reclamation level, and Wynn is right behind you, all her printouts forgotten. The great pump — the iron heart of Vault 73 — is shuddering in its housing, and when you crack the regulator panel, you already know what you'll find.
+You're the first tech to the reclamation level, and Wynn is right behind you, all her printouts forgotten. The great pump — the iron heart of Vault 27 — is shuddering in its housing, and when you crack the regulator panel, you already know what you'll find.
 
 The reclamation regulator is slag. Ceramic seals gone, the housing scorched black, the part that turns a mile of dead rock into clean water cooked beyond any fixing you can do with spares and a wrench. The brownout that fried the door, the heat in the clinic, the spitty showers — all of it was this, coming.
 
@@ -523,9 +559,9 @@ Wynn stares at the ruined part in your hands. <span class="say">"...Can you fix 
 },
 
 a_assembly:{
-  crumb:"VAULT 73 · ATRIUM · 19:00",
+  crumb:"VAULT 27 · ATRIUM · 19:00",
   text:
-`Wynn calls the whole vault to the atrium, under the painted sky, around the dry stone fountain where children used to throw caps for luck. Two hundred faces. You find the three that matter: Dax near the front with his arms crossed too tight; Cass against the wall, already looking at you; Lark, small in the crowd, holding someone's hand and watching you because you're the one who fixes things.
+`Wynn calls the whole vault to the atrium, under the painted sky, around the dry stone fountain where children used to throw caps for luck. Two hundred faces. You find the three that matter: Dax near the front with his arms crossed too tight; Cass against the wall, already looking at you; Dottie, small in the crowd, holding someone's hand and watching you because you're the one who fixes things.
 
 Wynn doesn't soften it. The pump is dead. The part can't be made down here. Rationing begins tonight, and even at half a cup a day, the reserves give the vault ninety days. Then nothing.
 
@@ -538,20 +574,20 @@ The atrium goes very quiet. Everyone understands what she's asking. Almost no on
         logIt("Climbed the dry fountain and steadied two hundred terrified people when the vault learned the truth.")) },
     { key:"2", label:"Hold your ground and your nerve while the fear washes over the crowd. Think it through.",
       to:"a_decision", effect:chain(sp("E",2), logIt("Kept your nerve in the panicking atrium and thought the problem through to its only answer.")) },
-    { key:"3", label:"Watch the three faces that matter — Dax, Cass, Lark — and let that decide you.",
+    { key:"3", label:"Watch the three faces that matter — Dax, Cass, Dottie — and let that decide you.",
       to:"a_decision", effect:chain(sp("P",1), bond("robin",1), bond("cass",1), bond("sam",1),
         logIt("In the panic, you watched the only three faces that mattered — and knew what you had to do.")) },
   ]
 },
 
 a_decision:{
-  crumb:"VAULT 73 · ATRIUM · 19:20",
+  crumb:"VAULT 27 · ATRIUM · 19:20",
   text:
-`You already know it's you. You knew it before Wynn called the assembly. You're the only tech who understands the pump well enough to recognize the right part when you find it; you're young enough to make the walk; and when you look at Lark's face in that crowd, the math stops being math.
+`You already know it's you. You knew it before Wynn called the assembly. You're the only tech who understands the pump well enough to recognize the right part when you find it; you're young enough to make the walk; and when you look at Dottie's face in that crowd, the math stops being math.
 
 You say it out loud so the whole vault hears, so no one else's child has to volunteer their parent: <span class="say">"I'll go."</span>
 
-The silence breaks differently this time — not panic, but the terrible relief of two hundred people who get to keep being afraid for someone else instead of themselves. Wynn closes her eyes a moment. Dax shoulders to the front, jaw working. Cass hasn't moved from the wall, but her hand is pressed flat over her mouth. And Lark has gone utterly, frighteningly still.
+The silence breaks differently this time — not panic, but the terrible relief of two hundred people who get to keep being afraid for someone else instead of themselves. Wynn closes her eyes a moment. Dax shoulders to the front, jaw working. Cass hasn't moved from the wall, but her hand is pressed flat over her mouth. And Dottie has gone utterly, frighteningly still.
 
 Why you, when it comes down to it — what do you carry out that door?`,
   choices:[
@@ -561,36 +597,36 @@ Why you, when it comes down to it — what do you carry out that door?`,
     { key:"2", label:"Because you made Cass a promise about the sky — and you keep your promises.",
       to:"a_goodbye", effect:chain(sp("C",1), sp("L",1), bond("cass",1), flag("motive_promise"),
         logIt("You volunteered, in part, to keep a promise to Cass about seeing the real sky together.")) },
-    { key:"3", label:"Because Lark still believes you can fix anything — and you refuse to be the one who proves her wrong.",
+    { key:"3", label:"Because Dottie still believes you can fix anything — and you refuse to be the one who proves her wrong.",
       to:"a_goodbye", effect:chain(sp("E",1), bond("sam",2), flag("motive_sam"),
-        logIt("You volunteered so Lark never learns there's a thing her sibling couldn't fix.")) },
+        logIt("You volunteered so Dottie never learns there's a thing her sibling couldn't fix.")) },
   ]
 },
 
 
 a_goodbye:{
-  crumb:"VAULT 73 · THE DOOR · 21:40",
-  text:
+  crumb:"VAULT 27 · THE DOOR · 21:40",
+  text:()=>
 `They don't let you go empty-handed, and they don't let you go alone to the threshold. The vault gathers what it can spare, but the three who matter come with their own gifts, in the corridor before the door.
 
-Dax gets to you first, shoving something heavy and wrapped into your chest. <span class="say">"Lifted it from the security locker. Don't tell Wynn."</span> It's a 10mm pistol and a box of rounds. His grin is doing a lot of work to hold his face together. <span class="say">"You come back, Sparks. You come back, or I'm coming out there to drag you home and I will complain the entire way."</span>
+Dax gets to you first, shoving something heavy and wrapped into your chest. <span class="say">"Lifted it from the security locker. Don't tell Wynn."</span> It's a 10mm pistol and a box of rounds. His grin is doing a lot of work to hold his face together. <span class="say">"You come back, ${state.dwellerName}. You come back, or I'm coming out there to drag you home and I will complain the entire way."</span>
 
 Cass presses a doctor's bundle into your hands — stimpaks, a bag of RadAway, everything the clinic could justify losing — and then, quieter, a cracked photo of the two of you under the grow-lights. <span class="say">"So you remember what you're walking back to,"</span> she whispers. She doesn't say the promise out loud. She doesn't have to.
 
-And Lark. Lark steps up last, very brave and very small, and folds something into your palm: a scuffed bottle cap, her lucky one, the one she fished out of the dry fountain years ago. <span class="say">"It's the luckiest thing I have,"</span> Lark says, voice wobbling. <span class="say">"So you have to bring it back. You have to. That's the rule."</span>`,
+And Dottie. Dottie steps up last, very brave and very small, and folds something into your palm: a scuffed bottle cap, her lucky one, the one she fished out of the dry fountain years ago. <span class="say">"It's the luckiest thing I have,"</span> Dottie says, voice wobbling. <span class="say">"So you have to bring it back. You have to. That's the rule."</span>`,
   effect:chain(
     arm("pistol10mm"), give("ammo10mm",24),
     give("stimpak",3), give("radaway",1), give("cass_locket",1),
     give("sams_cap",1), sp("L",1),
     bond("robin",2), bond("cass",2), bond("sam",2),
-    logIt("Dax gave you a 10mm and rounds. Cass gave you stimpaks, RadAway, and a photo. Lark gave you her lucky cap — on the condition you bring it home.")),
+    logIt("Dax gave you a 10mm and rounds. Cass gave you stimpaks, RadAway, and a photo. Dottie gave you her lucky cap — on the condition you bring it home.")),
   choices:[
     { key:"1", label:"Hold all three of them one last time, and let go.", to:"pipboy_boot" },
   ]
 },
 
 pipboy_boot:{
-  crumb:"VAULT 73 · THE DOOR · 21:55",
+  crumb:"VAULT 27 · THE DOOR · 21:55",
   text:()=>{
     const t=deriveTitle();
     return `Last of all, Overseer Wynn. She fits a Pip-Boy 3000 onto your wrist — scratched, warm, older than anyone living — and a small issue pack onto your shoulders, and counts forty caps from the vault's pre-war stash into your hand. <span class="say">"It's not much of a fortune. Out there, they say it buys bread and bullets. Make it last."</span>
@@ -598,9 +634,9 @@ pipboy_boot:{
 The Pip-Boy boots with a sweep of green light, syncs to your vitals, and reads back the shape of you — not a job they assigned, but the sum of a life lived in these halls and one long, ordinary day:
 
 <span class="ok">S.P.E.C.I.A.L.  ${specialLine()}</span>
-<span class="ok">The vault knew you as Sparks. The wasteland will come to know you as ${t}.</span>
+<span class="ok">The vault knew you as ${state.dwellerName}. The wasteland will come to know you as ${t}.</span>
 
-Wynn holds your gaze. <span class="say">"You were the best of us at the small repairs,"</span> she says. <span class="say">"Now go fix the biggest one. Find the regulator. And Sparks — come home. That's not an order. It's the only thing I've got left to ask."</span>
+Wynn holds your gaze. <span class="say">"You were the best of us at the small repairs,"</span> she says. <span class="say">"Now go fix the biggest one. Find the regulator. And ${state.dwellerName} — come home. That's not an order. It's the only thing I've got left to ask."</span>
 
 <span class="ok">[ Your Pip-Boy is online — tap ▸ PIP-BOY to view STAT, your pack (INV), and your journal & the people you carry (DATA). ]</span>`;
   },
@@ -616,13 +652,13 @@ Wynn holds your gaze. <span class="say">"You were the best of us at the small re
 },
 
 door:{
-  crumb:"VAULT 73 · THE DOOR · 22:00",
-  text:
+  crumb:"VAULT 27 · THE DOOR · 22:00",
+  text:()=>
 `You walk to the end of the hall, where the enormous numbered gear waits. Nobody alive has seen it open. Behind you, two hundred people hold their breath; three of them hold something more than that.
 
 Wynn nods to the control booth. The release klaxon sounds. Pistons the size of your leg drive into the rock, and the great door shrieks against two centuries of dust and rolls aside — and for the first time in your life, you feel wind that no machine made, smell air no recycler cleaned.
 
-The tunnel beyond climbs toward a coin of painful white light. Lark is crying somewhere behind you. Cass is not, by what must be an act of enormous will. Dax says, far too loudly, <span class="say">"See you soon, Sparks,"</span> and it almost sounds like a fact.
+The tunnel beyond climbs toward a coin of painful white light. Dottie is crying somewhere behind you. Cass is not, by what must be an act of enormous will. Dax says, far too loudly, <span class="say">"See you soon, ${state.dwellerName},"</span> and it almost sounds like a fact.
 
 You step toward the light, and the only world you've ever known stays behind you, counting days.`,
   choices:[
@@ -632,13 +668,13 @@ You step toward the light, and the only world you've ever known stays behind you
 
 /* -------- THRESHOLD -------- */
 threshold:{
-  crumb:"THE SALTPAN · VAULT 73 ENTRANCE",
+  crumb:"THE SALTPAN · VAULT 27 ENTRANCE",
   text:
 `The world is enormous. That's the first thing — there is no ceiling, and the sky goes up forever, the color of a bruise healing. You stand blinking in the mouth of a collapsed parking structure while a hot wind drags grit across cracked solar panels. Cass should be here for this. You press a hand to the photo in your pack and keep walking.
 
 The Saltpan stretches below: a white salt flat shimmering to the horizon, broken by the bones of a highway and, far off, a thread of green where something still grows.
 
-Just inside the tunnel mouth, slumped against the wall, is a skeleton in the rotted remains of a Vault 73 jumpsuit — someone who walked out this same door, long ago, and got no farther. A folded note is tucked into the rib cage. There's a stimpak still clipped to the belt, and the dull shape of a tire iron in the dust.
+Just inside the tunnel mouth, slumped against the wall, is a skeleton in the rotted remains of a Vault 27 jumpsuit — someone who walked out this same door, long ago, and got no farther. A folded note is tucked into the rib cage. There's a stimpak still clipped to the belt, and the dull shape of a tire iron in the dust.
 
 <span class="ok">[ Your field pack holds 6 slots. Heads up — you may not have room for everything. Open ▸ PIP-BOY (INV) to manage your load. ]</span>`,
   loot:[
@@ -656,7 +692,7 @@ note:{
   text:
 `The paper is brittle as a moth's wing. The hand is shaky, hurried:
 
-<span class="say">"To whoever Wynn sends next — and she will. The pump dies, she sends someone, that's the pattern. I was the someone before you. I didn't make it past the door; the rads up here were worse then. Listen: don't trust the salt. It's beautiful and it'll cook the water right out of you. Make for the green line west — there's a town, Drywell, built on the only good aquifer for fifty miles. The water-boss there is hard but fair. And whatever you do, keep your bag. Out here, what you can carry is who you are. — Sleeper 14, Vault 73."</span>
+<span class="say">"To whoever Wynn sends next — and she will. The pump dies, she sends someone, that's the pattern. I was the someone before you. I didn't make it past the door; the rads up here were worse then. Listen: don't trust the salt. It's beautiful and it'll cook the water right out of you. Make for the green line west — there's a town, Drywell, built on the only good aquifer for fifty miles. The water-boss there is hard but fair. And whatever you do, keep your bag. Out here, what you can carry is who you are. — Sleeper 14, Vault 27."</span>
 
 You fold the note away. Two hundred years of dwellers walking out this door, one at a time. You intend to be the one who walks back in.`,
   effect:chain(flag("readNote"), logIt("A note from <b>Sleeper 14</b> points west to <b>Drywell</b> and its aquifer.")),
@@ -671,7 +707,7 @@ saltpan:{
   text:
 `You walk into the white. The salt crunches like old snow, and the heat lies on you like a hand. Your Pip-Boy's geiger counter ticks lazily — survivable, for now.
 
-You're maybe an hour out when you see the other person: a lean woman in a dust-wrapped trail coat leading a two-headed brahmin laden with scrap. She sees you a heartbeat later, and her hand drifts toward the rifle slung at her back — then stops, because she's looking at your jumpsuit and the great blue 73 across your shoulders, and her face does something complicated.
+You're maybe an hour out when you see the other person: a lean woman in a dust-wrapped trail coat leading a two-headed brahmin laden with scrap. She sees you a heartbeat later, and her hand drifts toward the rifle slung at her back — then stops, because she's looking at your jumpsuit and the great blue 27 across your shoulders, and her face does something complicated.
 
 <span class="say">"Huh,"</span> she says, when you're close enough. <span class="say">"A vaultie. A real, actual, factory-fresh vaultie. Thought you people were a campfire story."</span> The brahmin lows at you with both heads. <span class="say">"Name's Mariel. You're either very lost or very new. Which is it?"</span>`,
   choices:[
@@ -780,7 +816,7 @@ Mariel blinks. <span class="say">"You actually know what's broken. That's rarer 
 
 She looks almost impressed. <span class="say">"Lead with that, with Aldous. Not the sob story — the tech."</span>`,
   effect:chain(flag("knows_aldous"),
-    logIt("Learned of <b>Scribe Aldous</b> in Drywell — Brotherhood, hoards water-tech, will deal for a look at Vault 73.")),
+    logIt("Learned of <b>Scribe Aldous</b> in Drywell — Brotherhood, hoards water-tech, will deal for a look at Vault 27.")),
   choices:[
     { key:"1", label:"\"I'll find Aldous. Thank you, Mariel.\"", to:"crank" },
   ]
@@ -794,7 +830,7 @@ crank:{
 
 He's a ghoul: skin like cracked leather over a skull, no nose to speak of, eyes a milky gold. Two centuries of radiation have eaten most of what he was, but not the man behind it. He's roasting something on a wire and doesn't reach for the hunting rifle leaning beside him.
 
-<span class="say">"Sit if you're sitting,"</span> he rasps without looking up. <span class="say">"Don't shoot if you're not shooting. I'm too old to do either standing."</span> A milky eye rolls toward your jumpsuit. <span class="say">"Vault 73. Knew a girl from 73 once, back when the lights were new. You lot still keeping the fountain in the atrium?"</span>`,
+<span class="say">"Sit if you're sitting,"</span> he rasps without looking up. <span class="say">"Don't shoot if you're not shooting. I'm too old to do either standing."</span> A milky eye rolls toward your jumpsuit. <span class="say">"Vault 27. Knew a girl from 27 once, back when the lights were new. You lot still keeping the fountain in the atrium?"</span>`,
   choices:[
     { key:"1", label:"\"You remember the Vault? How old ARE you?\"", to:"crank_old" },
     { key:"2", label:"[INT 7] Ask him what he knows about pre-war water reclamation tech.",
@@ -1052,7 +1088,7 @@ tess_brief:{
 
 She glances at the door, then back. <span class="say">"—the Brotherhood scribe, Aldous, has a crate of RobCo water regulators he's hoarding in the east tower. Saul wants them and Aldous won't deal with him; bad blood. But Aldous might deal with a vaultie. You play this right, dweller, you don't just get your Vault its part. You broker the thing that saves this town too. Now go see Peck, then climb that platform."</span>`,
   effect:chain(flag("knows_aldous"), flag("knows_regulators"), flag("briefed"),
-    logIt("<b>Tess'</b> brief: Aldous hoards RobCo regulators Saul desperately needs. Broker it right and you could save both Vault 73 and Drywell.")),
+    logIt("<b>Tess'</b> brief: Aldous hoards RobCo regulators Saul desperately needs. Broker it right and you could save both Vault 27 and Drywell.")),
   choices:[
     { key:"1", label:"Go see Peck the trader.", to:"trader" },
     { key:"2", label:"Go straight up to meet Saul Drywell.", to:"saul" },
@@ -1124,7 +1160,7 @@ aldous:{
 
 <span class="say">"You're not local,"</span> Scribe Aldous says, in the clipped way of a man who'd rather talk to a circuit board. <span class="say">"Vault-Tec jumpsuit, intact Pip-Boy 3000, no rad-scarring — you came out of a sealed vault, and recently."</span> He sets down a soldering iron. <span class="say">"State your business, dweller. I warn you: the Brotherhood does not give. We acquire, we preserve, we trade. We do not give."</span>`,
   choices:[
-    { key:"1", label:"[INT 6] Offer a full survey of Vault 73's intact pre-war systems for a regulator.",
+    { key:"1", label:"[INT 6] Offer a full survey of Vault 27's intact pre-war systems for a regulator.",
       to:"aldous_deal", check:{stat:"I",dc:6} },
     { key:"2", label:"\"I need a RobCo reclamation regulator. Name your price.\"", to:"aldous_price" },
     { key:"3", label:"\"Two hundred people are dying of thirst. Doesn't that move you at all?\"", to:"aldous_plea" },
@@ -1138,7 +1174,7 @@ aldous_plea:{
 
 He turns back to his bench. <span class="say">"If you want me to part with a regulator, give me a reason that serves the Brotherhood's mission — not your conscience. Technology for technology. That is the only language I trade in."</span> A pause. <span class="say">"You came out of an intact vault. Think harder about what you're standing in before you waste my time with feelings."</span>`,
   choices:[
-    { key:"1", label:"[INT 6] \"Then trade tech for tech: a full survey of Vault 73's systems.\"",
+    { key:"1", label:"[INT 6] \"Then trade tech for tech: a full survey of Vault 27's systems.\"",
       to:"aldous_deal", check:{stat:"I",dc:6} },
     { key:"2", label:"\"Fine. Name your price in caps or parts.\"", to:"aldous_price" },
   ]
@@ -1149,7 +1185,7 @@ aldous_price:{
   text:
 `Aldous actually laughs, a dry rustle. <span class="say">"Caps? I have no use for caps. A working deep-vault regulator is one of perhaps four in the entire Mojave, and you want to buy it like a bottle of Nuka-Cola."</span>
 
-He folds his arms. <span class="say">"There is exactly one thing you possess that the Brotherhood values more than the regulator: knowledge of an intact Vault-Tec installation. Vault 73's reactor, its purification array, its mainframe — all of it pristine, untouched, exactly as the Enclave's grandfathers left it. Grant the Brotherhood survey access — let me catalogue what's down there — and a regulator is yours. That is the deal. There is no other."</span>`,
+He folds his arms. <span class="say">"There is exactly one thing you possess that the Brotherhood values more than the regulator: knowledge of an intact Vault-Tec installation. Vault 27's reactor, its purification array, its mainframe — all of it pristine, untouched, exactly as the Enclave's grandfathers left it. Grant the Brotherhood survey access — let me catalogue what's down there — and a regulator is yours. That is the deal. There is no other."</span>`,
   choices:[
     { key:"1", label:"[INT 6] Negotiate the survey terms to protect your people first.",
       to:"aldous_deal", check:{stat:"I",dc:6} },
@@ -1161,13 +1197,13 @@ He folds his arms. <span class="say">"There is exactly one thing you possess tha
 aldous_deal:{
   crumb:"DRYWELL · ALDOUS · TERMS",
   text:
-`You don't flinch, and you don't gush. You talk like an engineer to an engineer: survey access, yes — but documented, supervised, no removal of core systems, and Vault 73's people stay sovereign over their own door. In exchange: the regulator now, plus Aldous's word, witnessed, that the Brotherhood treats Vault 73 as a partner, not a salvage site.
+`You don't flinch, and you don't gush. You talk like an engineer to an engineer: survey access, yes — but documented, supervised, no removal of core systems, and Vault 27's people stay sovereign over their own door. In exchange: the regulator now, plus Aldous's word, witnessed, that the Brotherhood treats Vault 27 as a partner, not a salvage site.
 
 Aldous's magnified eyes narrow, then — grudgingly — warm. <span class="say">"You think like one of us. That's almost insulting."</span> He pulls a sealed crate from beneath the bench and lifts out a regulator: ceramic-and-steel, RobCo-stamped, immaculate. <span class="say">"Terms accepted, dweller. The Brotherhood honors a sharp negotiator more than a desperate one."</span>
 
 He places it in your hands. It's heavier than it looks, and it's two hundred lives.`,
   effect:chain(flag("has_regulator"), flag("aldous_partner"),
-    logIt("<b>Negotiated</b> with Scribe Aldous: regulator now, supervised survey later, Vault 73 stays sovereign. You're carrying the part home.")),
+    logIt("<b>Negotiated</b> with Scribe Aldous: regulator now, supervised survey later, Vault 27 stays sovereign. You're carrying the part home.")),
   choices:[
     { key:"1", label:"\"And Saul's well? It's failing too.\"", to:"broker", need:{flag:"knows_regulators"},
       hideUnless:"knows_regulators" },
@@ -1180,11 +1216,11 @@ aldous_simple:{
   text:
 `<span class="say">"Catalogue it,"</span> you say. <span class="say">"Just give me the part."</span>
 
-Aldous nods once and produces the regulator without ceremony. <span class="say">"Wise. A vault that shares its knowledge survives; a vault that hoards it becomes a tomb we excavate later anyway."</span> The crate clicks shut. <span class="say">"My team will follow you to Vault 73 within the season. See that the door is open."</span>
+Aldous nods once and produces the regulator without ceremony. <span class="say">"Wise. A vault that shares its knowledge survives; a vault that hoards it becomes a tomb we excavate later anyway."</span> The crate clicks shut. <span class="say">"My team will follow you to Vault 27 within the season. See that the door is open."</span>
 
 It's done. You have the part — and you've promised the Brotherhood a key to your home. Wynn will have opinions. But Wynn isn't the one out here with two hundred lives going dry, and the regulator is real in your hands.`,
   effect:chain(flag("has_regulator"), flag("aldous_access"),
-    logIt("Agreed to full Brotherhood survey access for the regulator. You have the part; the Brotherhood gets a key to Vault 73.")),
+    logIt("Agreed to full Brotherhood survey access for the regulator. You have the part; the Brotherhood gets a key to Vault 27.")),
   choices:[
     { key:"1", label:"\"What about Saul's failing well?\"", to:"broker", need:{flag:"knows_regulators"},
       hideUnless:"knows_regulators" },
@@ -1201,7 +1237,7 @@ Aldous regards you a long moment, and to your surprise there's something like re
 
 You leave the tower empty-handed but unbought. There's another road to the part — the flooded RobCo facility east of town, where the Brotherhood pulls these crates from. Harder. More dangerous. But yours alone.`,
   effect:chain(flag("refused_aldous"),
-    logIt("Refused to trade Vault 73's secrets. No regulator from Aldous — but the flooded RobCo facility east of town remains an option.")),
+    logIt("Refused to trade Vault 27's secrets. No regulator from Aldous — but the flooded RobCo facility east of town remains an option.")),
   choices:[
     { key:"1", label:"Go meet Saul Drywell — maybe he has another way.", to:"saul" },
     { key:"2", label:"Take stock and end the day's reckoning here.", to:"ending_hub" },
@@ -1248,7 +1284,7 @@ For the first time, Saul turns and looks at you like you're a person and not a p
 saul_offer:{
   crumb:"DRYWELL · SAUL",
   text:
-`You lay your cards down: Vault 73, the dead pump, the regulator you've come a long way to find. And you make the trade plain — your engineering for his help, his weight in this town for your part.
+`You lay your cards down: Vault 27, the dead pump, the regulator you've come a long way to find. And you make the trade plain — your engineering for his help, his weight in this town for your part.
 
 Saul drums his fingers on the pump. <span class="say">"You want the same regulator I want. The Brotherhood scribe's got a crate of 'em and won't sell to me — old grudge, he thinks I'm a warlord with a well."</span> He grunts. <span class="say">"But he might deal with a vaultie. You go up that east tower and you get Aldous to part with two — one for your hole in the ground, one for my well — and I'll send you home with an armed escort, a brahmin of supplies, and the standing friendship of the only water in fifty miles. That's the offer. Don't come back down empty."</span>`,
   effect:chain(flag("saul_quest"), flag("knows_regulators"),
@@ -1264,11 +1300,11 @@ broker:{
   text:
 `This is the thing you can do that no raider's gun and no scribe's dogma can: you can make two stubborn men need each other.
 
-You carry Saul's problem to Aldous and Aldous's price to Saul, and back again, all afternoon — until the shape of a deal stands up. Aldous gets his survey of Vault 73 and, sweeter still, gets to plant the Brotherhood's flag as the power that fixed Drywell's well, NCR banner be damned. Saul gets his flow back and a regulator besides. Vault 73 gets the part that keeps two hundred people breathing. Everybody gives a little. Nobody bleeds.
+You carry Saul's problem to Aldous and Aldous's price to Saul, and back again, all afternoon — until the shape of a deal stands up. Aldous gets his survey of Vault 27 and, sweeter still, gets to plant the Brotherhood's flag as the power that fixed Drywell's well, NCR banner be damned. Saul gets his flow back and a regulator besides. Vault 27 gets the part that keeps two hundred people breathing. Everybody gives a little. Nobody bleeds.
 
 When it's done, Aldous hands you two regulators in a padded crate, and something close to a smile. <span class="say">"You'd have made a fine scribe, dweller. You made men trade who'd sooner have fought."</span> Down at the well, Saul clasps your forearm like an equal. <span class="say">"Drywell remembers its friends. You ever need water, a gun, or a roof — you've got all three here. Now go home. Your people have waited two centuries; don't make 'em wait on you."</span>`,
   effect:chain(flag("has_regulator"), flag("brokered_peace"), flag("aldous_partner"), flag("saul_ally"),
-    logIt("<b>Brokered the grand bargain</b>: regulators for Vault 73 AND Drywell, a Brotherhood survey on fair terms, and a standing alliance. Everyone wins.")),
+    logIt("<b>Brokered the grand bargain</b>: regulators for Vault 27 AND Drywell, a Brotherhood survey on fair terms, and a standing alliance. Everyone wins.")),
   choices:[
     { key:"1", label:"Begin the long walk home — with friends at your back.", to:"ending_hub" },
   ]
@@ -1293,32 +1329,32 @@ ending_hub:{
 function endHero(){ return (
 `You walk out of Drywell at dusk with two regulators on a borrowed brahmin, an NCR escort Saul shamed into lending you, and Mariel riding point because she "wasn't doing anything anyway."
 
-Behind you, the well of Drywell runs full for the first time in months, and a Brotherhood scribe is already drafting the survey that will, in its careful tin-can way, treat your home as a partner instead of a prize. Ahead, across the darkening Saltpan, a sealed door waits in a collapsed parking structure — and behind it, three faces among two hundred. Dax, who swore to come drag you home. Cass, waiting under a painted sky for the real one you promised her. Lark, counting days, holding the place where a lucky bottle cap used to be.
+Behind you, the well of Drywell runs full for the first time in months, and a Brotherhood scribe is already drafting the survey that will, in its careful tin-can way, treat your home as a partner instead of a prize. Ahead, across the darkening Saltpan, a sealed door waits in a collapsed parking structure — and behind it, three faces among two hundred. Dax, who swore to come drag you home. Cass, waiting under a painted sky for the real one you promised her. Dottie, counting days, holding the place where a lucky bottle cap used to be.
 
 You take out that scuffed cap, turn it over in the red light, and put it away again. The rule is you bring it back. You intend to keep the rule — and to bring back the water, the world, and yourself.
 
 <span class="ok">— END OF CHAPTER ONE: THE LONG WALK HOME —</span>
-The grand bargain. Vault 73 and Drywell both live, the Brotherhood owes you a favor, and everyone you love is still on the far side of that door, waiting. The walk home is the next chapter.`); }
+The grand bargain. Vault 27 and Drywell both live, the Brotherhood owes you a favor, and everyone you love is still on the far side of that door, waiting. The walk home is the next chapter.`); }
 
 function endGood(){ return (
 `You shoulder your pack — heavier now, by one RobCo regulator and two hundred lives — and turn east, toward home.
 
-It cost you something to get it: a promise to the Brotherhood, a long road, a piece of who you were when the door first rolled open. But the part is real, and it's enough. Somewhere across the salt, a dry fountain waits to run again, an old Overseer counts the days you've been gone — and three people you'd cross a wasteland for wait with her. Dax, with his terrible jokes. Cass, with a promise about the sky. Lark, with a rule about a lucky cap.
+It cost you something to get it: a promise to the Brotherhood, a long road, a piece of who you were when the door first rolled open. But the part is real, and it's enough. Somewhere across the salt, a dry fountain waits to run again, an old Overseer counts the days you've been gone — and three people you'd cross a wasteland for wait with her. Dax, with his terrible jokes. Cass, with a promise about the sky. Dottie, with a rule about a lucky cap.
 
 The wasteland didn't eat you. You learned its rules — trust earns trust, a steady spine beats a drawn gun, what you carry is who you are — and you turn back toward the dark carrying the one thing that got you across it: people worth going home to.
 
 <span class="ok">— END OF CHAPTER ONE: THE LONG WALK HOME —</span>
-You secured the regulator for Vault 73. The walk home is its own chapter — and everyone you love is at the end of it.`); }
+You secured the regulator for Vault 27. The walk home is its own chapter — and everyone you love is at the end of it.`); }
 
 function endOpen(){ return (
-`Night comes to Drywell, and you take stock by lantern-light, Lark's lucky cap warm in your fist.
+`Night comes to Drywell, and you take stock by lantern-light, Dottie's lucky cap warm in your fist.
 
 You didn't get the regulator today — not on terms you'd accept. But you crossed the Saltpan, talked past raiders, healed a stranger, and walked into the one town that matters with your name your own. There's still the flooded RobCo facility east of town, hot with rads and thick with whatever's nested in the dark. There's still Aldous's standing offer, for the day desperation outvotes pride. There's still time — not much, but some.
 
-Two hundred people are counting days. Three of them are Dax, Cass, and Lark. Tomorrow you go and get them their water — one way or another, because the rule is you come home, and you intend to keep it.
+Two hundred people are counting days. Three of them are Dax, Cass, and Dottie. Tomorrow you go and get them their water — one way or another, because the rule is you come home, and you intend to keep it.
 
 <span class="ok">— END OF CHAPTER ONE: THE LONG WALK HOME —</span>
-The hard road remains open. Vault 73 still thirsts, the people you love still wait, and the next chapter is yours to walk.`); }
+The hard road remains open. Vault 27 still thirsts, the people you love still wait, and the next chapter is yours to walk.`); }
 
 /* =====================================================================
    ENGINE
@@ -1444,6 +1480,17 @@ function addBtn(key,label,fn,cls){
 
 function navigate(c){
   if(c.restart){ start(); return; }
+  // capture the page we're leaving (read-only journal of the last 5 scenes)
+  if(currentNode && currentNodeId && !TERMINAL[currentNodeId]){
+    const rawText = (typeof currentNode.text==="function") ? currentNode.text() : currentNode.text;
+    const rawLabel = (typeof c.label==="string") ? c.label : "";
+    state.history = (state.history||[]).concat([{
+      node: currentNodeId,
+      crumb: currentNode.crumb || "",
+      text: rawText,
+      choice: rawLabel
+    }]).slice(-5);
+  }
   if(c.effect) c.effect();
   if(c.give) c.give.forEach(g=>addItem(g[0],g[1]||1));
   const dest = (typeof c.to==="function") ? c.to() : c.to;
@@ -1487,7 +1534,7 @@ You sink down in the hot dust. The Saltpan glitters, beautiful and patient, and 
 /* =====================================================================
    MODULAR STORY REGISTRY
    The engine above never needs to change. A "story" is a continuous saga
-   (e.g. Vault 73). It's built from one or more chapters. Each chapter is a
+   (e.g. Vault 27). It's built from one or more chapters. Each chapter is a
    self-contained module of nodes (+ optional items) that plugs in here.
      • Same storyId  = same continuous save (Chapter 1 → 2 → 3...).
      • New storyId   = a separate story with its own save slot.
@@ -1508,7 +1555,7 @@ const startOf = storyId => { const s=STORIES.find(x=>x.storyId===storyId); retur
 const DEFAULT_STORY = "vault73_longwalk";
 /* Chapter One claims every scene already defined above. */
 registerChapter({
-  storyId: DEFAULT_STORY, chapter:1, title:"Vault 73: The Long Walk Home",
+  storyId: DEFAULT_STORY, chapter:1, title:"Vault 27: The Long Walk Home",
   start:"intro", nodeIds:Object.keys(NODES)
 });
 
@@ -1518,7 +1565,7 @@ registerChapter({
    registerChapter({
      storyId: "vault73_longwalk",   // same id keeps one continuous save
      chapter: 2,
-     title:   "Vault 73: The Long Walk Home",
+     title:   "Vault 27: The Long Walk Home",
      start:   "ch2_intro",
      items: {                        // optional: new gear this chapter introduces
        laser_pistol:{name:"Laser Pistol",cat:"weapon",kind:"gun",dmg:26,ammo:"ammo_ec",size:2,desc:"..."},
@@ -1663,6 +1710,31 @@ function wireCollapsibles(){
 
 function renderData(){
   let html="";
+
+  /* ---- Pages You've Read: read-only journal of the last 5 scenes ---- */
+  const hist = state.history || [];
+  let histBody;
+  if(hist.length===0){
+    histBody = `<div class="empty">Your last few pages will appear here as you read on.</div>`;
+  } else {
+    histBody = `<div style="font-size:12.5px;color:var(--dim);font-style:italic;margin-bottom:6px">A record of the last ${hist.length} page${hist.length===1?"":"s"} and the choice${hist.length===1?"":"s"} you made. Read-only — your decisions stand.</div>`;
+    // newest at the top
+    for(let i=hist.length-1; i>=0; i--){
+      const h=hist[i];
+      const pageNo = hist.length - i;
+      histBody += `<div style="border:1px solid var(--line);border-radius:6px;padding:9px 11px;margin:8px 0;background:rgba(54,255,126,.03)">
+        <div style="font-family:'VT323',monospace;font-size:16px;color:var(--dim);letter-spacing:1.5px;margin-bottom:5px">
+          ‹ ${pageNo===1?"PREVIOUS PAGE":"PAGE −"+(pageNo-1)} · ${escapeHtml(h.crumb||"")}
+        </div>
+        <div style="font-size:13.5px;line-height:1.65;color:var(--green);white-space:pre-wrap;margin-bottom:7px">${h.text||""}</div>
+        ${h.choice ? `<div style="font-family:'VT323',monospace;font-size:16px;color:var(--warn);border-top:1px dotted var(--line);padding-top:6px;letter-spacing:.4px">
+          ➤ Your choice: <span style="color:var(--bright)">${escapeHtml(h.choice)}</span>
+        </div>` : ""}
+      </div>`;
+    }
+  }
+  html += pipSection("history","Pages You've Read", histBody, true);
+
   const anyBond = state.bonds && (state.bonds.robin||state.bonds.cass||state.bonds.sam);
   if(anyBond){
     const tie=(name,who,line)=>{
@@ -1673,7 +1745,7 @@ function renderData(){
     const bonds =
       tie("Dax","robin","Your best friend since the nursery. Borrowed you a 10mm and a promise to drag you home.")+
       tie("Cassara","cass","The one you love — Cass, to you. Hydroponics dreamer, waiting under a painted sky for the real one.")+
-      tie("Lark","sam","Your kid sister. Lent you her lucky cap. The rule is you bring it back.");
+      tie("Dottie","sam","Your kid sister. Lent you her lucky cap. The rule is you bring it back.");
     html+=pipSection("bonds","The People You Carry", bonds, true);
   }
   const logBody = state.log.length===0
@@ -1852,6 +1924,8 @@ function migrate(saved){
   st.inv = saved.state.inv || {};
   st.flags = saved.state.flags || {};
   st.log = saved.state.log || [];
+  st.history = saved.state.history || [];
+  st.dwellerName = saved.state.dwellerName || "Diego";
   return { v:2, story: saved.story || DEFAULT_STORY, node: saved.node, state: st, erased: saved.erased };
 }
 
@@ -1897,7 +1971,7 @@ function showContinuePrompt(saved){
   renderHUD();
   closePip();
   currentNode=null;
-  crumbEl.textContent="VAULT 73 · PIP-BOY · SAVED RECORD";
+  crumbEl.textContent="VAULT 27 · PIP-BOY · SAVED RECORD";
   const place = (NODES[saved.node]&&NODES[saved.node].crumb) ? NODES[saved.node].crumb : "the wasteland";
   const src = cloud.user ? "synced from the cloud" : "held on this device";
   proseEl.innerHTML =
