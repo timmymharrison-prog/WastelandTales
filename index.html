@@ -402,15 +402,17 @@ const NODES = {
 intro:{
   crumb:"VAULT 27 · RESIDENTIAL · 06:14",
   text:
-`You wake the way you always do — to the hum. Two hundred years of unbroken machine-breath in the walls, so constant you only notice it in dreams, where the world is silent and wrong.
+`You wake the way you always do — to the hum. Two hundred and seven years of unbroken machine-breath in the walls, the sound the vault makes instead of weather. You only ever notice it in dreams, where the world goes silent and that silence is the most frightening thing your sleeping mind can imagine. Awake, the hum means the lights work, the air moves, the water runs. The hum means alive.
 
-Then you notice the other thing: a weight on your legs and a grin three inches from your face. Dottie, your younger sister, has climbed onto your bunk to wake you the way she's done since she could walk.
+Then the other weight: a knee in your ribs, two braids hanging down like plumb lines, and a gap-toothed grin three inches from your nose. Dottie. Nine years old and on your bunk again, where she is officially too big to be and unofficially never going to stop.
 
-<span class="say">"You're late, you're late, you slept through the bell,"</span> Dottie announces, delighted. <span class="say">"Dax already went down. And the shower on our level's doing the spitty thing again — Mr. Okafor was cussing about it. Third time this week!"</span> She flops back dramatically. <span class="say">"Everybody says you're the only one who can fix anything. So fix the water before it gets weird, okay? It's getting weird."</span>
+<span class="say">"You slept through the bell. Again."</span> She says it the way she says everything — as an announcement, a fact for the record. <span class="say">"Dax already went down. And the shower's doing the spitty thing, and Mr. Okafor said a word I'm not allowed to say, and — "</span> she leans in, conspiratorial, <span class="say">"— *actually* it's been four days, not three, so when people say three they're wrong."</span> She flops back across your legs. <span class="say">"Everybody says you can fix anything. So fix the water before it gets weird. It's already getting weird."</span>
 
-The Pip-Boy on the shelf chirps its morning sync and reads your file aloud the way it does every dawn, in its small clipped vault-system voice: <span class="ok">"Diego Orr. Born 2256. Vault 27 utility tech."</span>
+Down the corridor, through the open hatch, you can hear Aunt Pia in the family unit, working the comb through the snarls she'll braid in a minute, telling your father something in the low even voice she uses on him — the watch numbers, probably, the old pre-war ones he likes to hear read out. He doesn't answer. He almost never answers. Pia keeps talking anyway, because the talking is the point.
 
-You're the one they send when a door won't seal or a pump skips a beat. It's a small life, three hundred meters of steel and a sky painted on the cafeteria ceiling. But it's yours, and the people in it are yours, and this morning that feels like enough.`,
+On the shelf, your Pip-Boy chirps its morning sync and reads your file in its small clipped vault-voice, the way it has every dawn of your life: <span class="ok">"Diego Orr. Born 2256. Vault 27 utility tech."</span>
+
+A name, a year, a job. Three hundred meters of steel and a sky somebody painted on the cafeteria ceiling before your grandparents were born. It is a small life. But the people in it are yours, and this morning — this last ordinary morning, though you don't know that yet — that feels like enough.`,
   choices:[
     { key:"1", label:"(Continue)", to:"naming" },
   ]
@@ -419,59 +421,63 @@ You're the one they send when a door won't seal or a pump skips a beat. It's a s
 naming:{
   crumb:"VAULT 27 · RESIDENTIAL · 06:15",
   text:
-`Dottie is still bouncing on your legs. The Pip-Boy's read-out fades out. The vault knows you as Diego Orr — that's what's on every file, every roster, every door log going back to the day you were born.
+`Dottie is still draped across your legs, in no hurry, watching you with those dark eyes that miss nothing. The Pip-Boy's readout fades to standby. *Diego Orr.* That's the name on every roster, every door log, every ration card, going back to the day you were born in the clinic upstairs.
 
-But out in the corridors, where people have known you all your life — what do they actually *call* you?`,
+But a file-name isn't what people *call* you. Out in the corridors, on the crew, at the table where Dax is holding your chair right now — they've known you your whole life, and somewhere along the way they landed on something that stuck.
+
+What is it?`,
   choices:[
-    { key:"1", label:"\"Wrench.\" The crew name. Earned by the work — you fix things, that's what you are.",
+    { key:"1", label:"\"Wrench.\" The crew gave it to you. You fix what's broken — it's the truest thing about you.",
       to:"a_morning_choices", effect:chain(()=>{ state.dwellerName="Wrench"; },
-        logIt("On the maintenance crew and around the vault, they call you <b>Wrench</b>.")) },
-    { key:"2", label:"\"Steady.\" The character name. Earned over years — your hands don't shake when others' do.",
+        logIt("The crew calls you <b>Wrench</b> — Dax started it, years ago, and never once took credit.")) },
+    { key:"2", label:"\"Steady.\" Earned slow, over years. Your hands don't shake when everyone else's do.",
       to:"a_morning_choices", effect:chain(()=>{ state.dwellerName="Steady"; },
-        logIt("Around the vault, they call you <b>Steady</b> — for the hands that don't shake.")) },
-    { key:"3", label:"\"Orr.\" Just your last name, said the way close family says it. The intimate one.",
+        logIt("They call you <b>Steady</b> — for the hands that hold when others shake. Dax made it stick.")) },
+    { key:"3", label:"\"Orr.\" Just the last name, the way the people closest to you say it. All yours.",
       to:"a_morning_choices", effect:chain(()=>{ state.dwellerName="Orr"; },
-        logIt("To the people closest to you, you're just <b>Orr</b>.")) },
-    { key:"4", label:"\"Diego.\" That's enough. No nickname; the name your mother gave you does the work.",
+        logIt("To the ones closest to you, you're just <b>Orr</b> — Dax has called you that since you were nine.")) },
+    { key:"4", label:"\"Diego.\" No nickname. The name your mother gave you was always enough.",
       to:"a_morning_choices", effect:chain(()=>{ state.dwellerName="Diego"; },
-        logIt("No vault-nickname. To everyone you love, you're just <b>Diego</b>.")) },
+        logIt("No vault-handle. To everyone who loves you, you've only ever been <b>Diego</b>.")) },
   ]
 },
 
 a_morning_choices:{
   crumb:"VAULT 27 · RESIDENTIAL · 06:16",
-  text:()=>`Dottie elbows you in the ribs. <span class="say">"${state.dwellerName}. Up. Now."</span>
+  text:()=>`<span class="say">"${state.dwellerName}."</span> Dottie digs an elbow in, then catches your hand for half a second — reaching for it the way she used to, before she started remembering not to — and lets go before it counts. <span class="say">"Up. The bell already went."</span>
 
-You have about ten minutes before shift bell.`,
+Ten minutes to shift. The shower ticks and spits in the wall behind her, swallowing, like something with a dry throat.`,
   choices:[
-    { key:"1", label:"Pull the shower regulator apart before shift — that \"spitty thing\" is bugging you.",
+    { key:"1", label:"Pull the shower regulator apart before shift — that spitting has been bothering you for four days.",
       to:"a_mess", effect:chain(sp("I",1), sp("P",1), flag("noticed_water"),
-        logIt("Morning: you tore into the level's water regulator before shift. Pressure's down — and it's not the regulator.")) },
-    { key:"2", label:"Race Dottie down to the mess and let her win by a hair.",
+        logIt("Morning: stripped the level's water regulator before shift. Pressure's down — and the regulator's clean. It's something upstream.")) },
+    { key:"2", label:"Race Dottie to the mess and let her win by half a stride, like always.",
       to:"a_mess", effect:chain(sp("A",1), bond("sam",1),
-        logIt("Morning: raced Dottie to the mess and let her win. Her laugh is the best sound in the vault.")) },
-    { key:"3", label:"Knock out your morning lifting set first — old habit, keeps you steady.",
+        logIt("Morning: raced Dottie to the mess and lost on purpose. Her laugh is one of the best sounds in the vault.")) },
+    { key:"3", label:"Get your lifting set in first — the old habit, the one that keeps you level.",
       to:"a_mess", effect:chain(sp("S",1), sp("E",1),
-        logIt("Morning: got your lifting set in before shift, same as every day.")) },
+        logIt("Morning: the lifting set before shift, same as every day. It keeps you steady.")) },
   ]
 },
 
 a_mess:{
   crumb:"VAULT 27 · MESS HALL · 06:40",
   text:()=>
-`The mess smells of reconstituted eggs and chlorine. Dax's already at your usual table, boots up on a chair, holding it for you the way he has since you were both eight and the bigger kids ran the cafeteria.
+`The mess smells the way it always smells: reconstituted egg, chlorine off the dishline, the burnt-chicory tang of something the kitchen calls coffee. Your table is the one against the far wall — yours and Dax's since you were eight and the bigger kids ran the room — and Dax is already folded into it, all six-foot-four of him crammed down small, knees up under the table, one boot hooked around the leg of your chair to hold it.
 
-<span class="say">"There's ${state.dwellerName},"</span> Dax says, kicking the chair out for you. <span class="say">"You hear? Pressure's down on three levels now, not just ours. Maintenance is 'monitoring it.'"</span> He makes air-quotes with a fork. <span class="say">"Which is maintenance for 'we have no idea.' Tell me you have an idea. You always have an idea."</span>
+That's the thing people forget about Dax until they're standing next to him: how *much* of him there is. He spends every waking minute making the room forget — ducking doors that don't need ducking, talking before anyone can get nervous, turning himself into the joke so nobody else has to wonder about the shoulders. It works. It's worked his whole life. You're one of the few who clocks the cost of it.
 
-Down the table, old Okafor grumbles that in his grandmother's day the taps never so much as hiccuped, and a couple of the younger dwellers go quiet, the way people do when a small worry starts looking for somewhere to grow.`,
+<span class="say">"There he is,"</span> Dax says, scraping the chair out for you, drumming a quick uneven rhythm on the tabletop with two fingers. <span class="say">"${state.dwellerName} graces us. You hear? Pressure's down on three levels now. Maintenance is — "</span> he makes air-quotes with a fork <span class="say">" — *monitoring it.* Which is maintenance for 'we got nothing.' So tell me you got something. You always got something, it's insufferable."</span>
+
+He's grinning, but the fingers are going fast and crooked on the table, the way they do when he's more worried than he'll say. Two tables over, a laundry worker laughs — a bright, sudden laugh at nothing, at the air — and the dwellers near her go still and then politely don't look, and the moment closes over like water. Dax doesn't turn around. You almost don't either.`,
   choices:[
-    { key:"1", label:"\"It's not the regulators. If three levels are dropping together, it's upstream — the intake.\"",
+    { key:"1", label:"\"It's not the regulators. Three levels dropping together — that's upstream. The intake.\"",
       to:"a_servo", effect:chain(sp("I",2), flag("suspects_intake"),
-        logIt("You told Dax the pressure drop is upstream at the aquifer intake — not the local regulators.")) },
-    { key:"2", label:"Wave it off and steady the table — no sense letting a hiccup become a panic.",
+        logIt("Told Dax the drop is upstream at the aquifer intake, not the local regulators. His fingers stopped drumming when you said it.")) },
+    { key:"2", label:"Wave it down and steady the table — a hiccup doesn't have to become a panic.",
       to:"a_servo", effect:chain(sp("C",2), bond("robin",1),
-        logIt("Kept the mess hall calm about the water — talked the worry back down.")) },
-    { key:"3", label:"\"I'll pull the pump-room logs myself after shift. We'll know for sure.\"",
+        logIt("Talked the worry back down at the mess table. Dax let you; he always lets you do the steadying.")) },
+    { key:"3", label:"\"I'll pull the pump-room logs after shift. Then we'll know instead of guessing.\"",
       to:"a_servo", effect:chain(sp("E",1), sp("P",1), flag("will_check_pump"),
         logIt("Promised Dax you'd pull the pump-room logs after shift and get a real answer.")) },
   ]
@@ -480,30 +486,36 @@ Down the table, old Okafor grumbles that in his grandmother's day the taps never
 a_servo:{
   crumb:"VAULT 27 · SECTOR 2 · 09:20",
   text:()=>
-`Your shift board lights up before you've finished your coffee: blast door 2-C is jammed half-open, and the maintenance lift is down, so it's a walk. Overseer Wynn catches you in the corridor on her way somewhere with a thick stack of printouts and a thin, tired smile.
+`Your shift board lights up before the coffee's even cold: blast door 2-C jammed half-open, maintenance lift down again, so it's a walk through the spine of the vault to get there. Halfway, you pass Reuben Vereen coming the other way — the water-tech, sixty-odd, grey and stooped, fingertips stained that permanent ochre the treatment reagents leave. The two of you trade the nod that maintenance men trade when there's no time, and he's gone, smelling of the chemical tang that never quite washes out of him.
 
-<span class="say">"${state.dwellerName}. Good. The door, when you get a moment — we can't seal Sector 2 with it gaping."</span> She hesitates, like she might say more, then doesn't. <span class="say">"...Thank you. For always saying yes."</span> And she's gone, walking fast, clutching those printouts a little too tightly.
+Around the next bend, Overseer Wynn. She's moving fast, a thick sheaf of printouts clamped under one arm, her left hand pushed down in her coat pocket the way she keeps it lately. She stops when she sees you, and something in her face works to arrange itself into the thin, tired smile she has for everyone.
 
-The door's a half-ton of stuck steel with a fried servo. You crouch in front of it. How you handle a stuck thing says a lot about a person, your old mentor used to say.`,
+<span class="say">"${state.dwellerName}. Good. The door — when you get a chance. We can't seal Sector 2 with it hanging open."</span> She holds your eye a beat longer than the errand needs. For a second it looks like there's a second sentence behind the first, something she's carried so long it's worn smooth. Then she lets it go. <span class="say">"...Thank you. For always saying yes."</span> And she's past you, walking too fast, holding those printouts a little too tight.
+
+The door's half a ton of stuck steel with a cooked servo. You crouch in front of it. *How a person handles a stuck thing tells you who they are,* your old mentor used to say, back when you were the kid holding the light.`,
   choices:[
-    { key:"1", label:"Brace your shoulder under the edge and muscle it back onto its track.",
-      to:"a_clinic", effect:chain(sp("S",2), logIt("Muscled the half-ton blast door back onto its track by main strength.")) },
-    { key:"2", label:"Pop the servo housing and rewire the actuator from spare parts.",
-      to:"a_clinic", effect:chain(sp("I",2), logIt("Rewired the dead door servo from spare parts — clean fix.")) },
-    { key:"3", label:"Trace the fault first — a blown servo never just blows. Find the why.",
+    { key:"1", label:"Brace your shoulder under the edge and put your whole body into it — muscle it back on its track.",
+      to:"a_clinic", effect:chain(sp("S",2), logIt("Muscled a half-ton blast door back onto its track by main strength alone.")) },
+    { key:"2", label:"Pop the servo housing and rewire the actuator from spares — do it right, not hard.",
+      to:"a_clinic", effect:chain(sp("I",2), logIt("Rewired the dead door servo from spare parts. Clean, quiet, correct.")) },
+    { key:"3", label:"Trace the fault first. A servo never just dies — find the why before you fix the what.",
       to:"a_clinic", effect:chain(sp("P",2), flag("found_brownout"),
-        logIt("Traced the door fault to a power brownout — the vault's drawing too hard somewhere. Filed it away.")) },
+        logIt("Traced the door fault back to a power brownout — the vault is pulling too hard somewhere downstream. Filed it away.")) },
   ]
 },
 
 a_clinic:{
   crumb:"VAULT 27 · CLINIC · 11:05",
   text:()=>
-`You're rerouting cable past the clinic when a cry pulls you in. A dweller's gone down in the waiting area — sweating, grey, breathing wrong. The clinic is hot, far too hot; the air recyclers run off the same water loop as everything else, and that loop is sick.
+`You're rerouting cable past the clinic when the cry pulls you in. A dweller's gone down in the waiting area — a man you half-know from the kitchen, grey-faced and sweating, his breath coming wrong. The clinic runs hot today, far too hot; the air handlers share the same sick loop as everything else, and you can feel the wrongness of the water in the wrongness of the air.
 
-And there, already kneeling by the fallen man with a cool cloth and steady hands, is Cassara — Cass, to you.
+Cassara is already on the floor beside him. Cass, to you — though here, in front of others, she calls you whatever the vault calls you, and you're both careful about that, the way you're careful about everything. A cool cloth, two fingers at his throat counting, her own pulse found and steadied first the way Dr. Marin taught her twenty years ago. Her face gives away nothing. Her hands give away less. She lost a patient once, at an age she doesn't talk about, and her hands learned that day never to shake again.
 
-You two have been something more than friends for a year now, careful and quiet about it the way the vault makes you be. Cass looks up, and the worry in her eyes isn't just for the patient. <span class="say">"It's the heat,"</span> she says. <span class="say">"Third one today. The recyclers can't keep up, and the doctor won't say why out loud."</span> She lowers her voice so only you can hear. <span class="say">"But you know why. Don't you, ${state.dwellerName}."</span>`,
+Old Dr. Marin watches from her office doorway, chicory tea going cold in her grip, and says — for the record, in the flat voice of a woman who's said it too many times — <span class="say">"Heat. Get him cooled, fluids in him."</span> She does not say *why* it's heat. She hasn't said why out loud in years.
+
+As Cass works, the man's lips move, too low for Marin across the room, just loud enough for the two of you: <span class="say">"They're in the walls. They're always in the walls. You just have to listen."</span> Cass's hand drifts to the side of her neck, sweeps a loose curl off it, rests there a moment — then she's all business again, and doesn't look up until she's sure of her own face.
+
+<span class="say">"Third one today,"</span> she says quietly, when his breathing eases. <span class="say">"The doctor calls it heat. You and I both know the heat's a symptom, not the cause."</span> Lower, just for you: <span class="say">"And you know the cause. Don't you, ${state.dwellerName}."</span>`,
   choices:[
     { key:"1", label:"Read the man's symptoms and call the treatment before the doctor does.",
       to:"a_cass", effect:chain(sp("I",1), sp("P",1), logIt("Diagnosed the collapsed dweller in the clinic — heat exhaustion from the failing cooling loop.")) },
@@ -518,13 +530,15 @@ You two have been something more than friends for a year now, careful and quiet 
 a_cass:{
   crumb:"VAULT 27 · HYDROPONICS · 13:30",
   text:
-`The crisis passes; the man will be fine. Cass catches your sleeve and pulls you into the hydroponics bay, where the grow-lights make a private little dusk among the bean rows. For a moment it's just the two of you and the green smell and the hum.
+`The man will be fine — this time. When the clinic settles, Cass catches your sleeve and steers you down to hydroponics, to the long bean rows where the grow-lights make their private little dusk. Forty years ago somebody calibrated those lights to a sunset over California that nobody alive has ever seen. It's the closest thing to evening the vault owns. It's the place Cass actually lives, in her head, whatever room her body happens to be in.
 
-<span class="say">"Tell me the truth,"</span> Cass says quietly. <span class="say">"Not the version you tell the mess hall. The water. How bad."</span>
+For a moment it's only the green smell, the faint sulfur of the nutrient lines, the hum — and the two of you, close, where no one is looking.
 
-You tell them what your gut already knows: the intake's failing, the pump's straining, and the vault has been quietly drinking its own reserves for weeks. Cass takes it in without flinching — she's held dying hands, she doesn't flinch — but her fingers find yours and hold on.
+<span class="say">"Tell me the truth,"</span> she says. <span class="say">"Not the mess-hall version. The water. How bad."</span>
 
-<span class="say">"You know what I think about, when I can't sleep?"</span> she murmurs. <span class="say">"The sky. The real one. They painted a fake one on the cafeteria ceiling and called it a kindness, but I want to stand under the true one with you, just once, before I'm old."</span> She almost laughs. <span class="say">"Stupid, right? Wanting the one thing the door's there to keep out."</span>`,
+You tell her what your gut already knows: the intake's failing, the pump's straining, the vault's been quietly drinking down reserves nobody's been told about. She takes it without flinching — flinching was trained out of her young — but her fingers find yours in the dusk and hold on, and her free hand drifts to the side of her neck again, resting there, steadying herself against something.
+
+<span class="say">"You know what I think about when I can't sleep?"</span> she says. <span class="say">"The real sky. They painted us a fake one on the ceiling and called it a kindness. I want the true one. Once. Standing next to you, before I'm old."</span> She almost laughs at herself. <span class="say">"Wanting the exact thing the door exists to keep out. Marin would probably call that a symptom too."</span>`,
   choices:[
     { key:"1", label:"\"It's not stupid. Promise me — if the door ever opens, we see it together.\"",
       to:"a_pump", effect:chain(sp("C",2), bond("cass",2), flag("sky_promise"),
@@ -541,13 +555,13 @@ You tell them what your gut already knows: the intake's failing, the pump's stra
 a_pump:{
   crumb:"VAULT 27 · RECLAMATION LEVEL · 15:48",
   text:
-`The alarm finds you in the corridor — not the soft chime of a fault, but the deep, full-throated klaxon the vault was built to dread. The aquifer alarm. In two hundred and seven years it has never once sounded for real.
+`The alarm finds you in the corridor at 15:48 — not the soft chime of a fault but the deep full-throated klaxon the vault was built to dread, the aquifer alarm, the one sound in two hundred and seven years that has never once sounded for real. Your body knows what it means before your mind catches up. You're already running.
 
-You're the first tech to the reclamation level, and Wynn is right behind you, all her printouts forgotten. The great pump — the iron heart of Vault 27 — is shuddering in its housing, and when you crack the regulator panel, you already know what you'll find.
+You're first tech to the reclamation level. Wynn is half a step behind you, printouts gone, left hand out of her pocket now and steady on the rail. The great pump — the iron heart of Vault 27, the thing the whole sealed world depends on — is shuddering in its housing like an animal trying to breathe. You crack the regulator panel and you already know, the way you knew at the showers this morning, the way you've half-known for four days.
 
-The reclamation regulator is slag. Ceramic seals gone, the housing scorched black, the part that turns a mile of dead rock into clean water cooked beyond any fixing you can do with spares and a wrench. The brownout that fried the door, the heat in the clinic, the spitty showers — all of it was this, coming.
+The reclamation regulator is slag. Ceramic seals gone to powder, the housing scorched black, the one component that turns a mile of dead rock into water you can drink cooked past anything you can do with spares and a wrench and a steady hand. The brownout that killed the door, the heat in the clinic, the spitting showers, the man on the clinic floor — all of it was *this*, walking toward you for weeks while you fixed the small things.
 
-Wynn stares at the ruined part in your hands. <span class="say">"...Can you fix it,"</span> she says. It isn't really a question. You're the best she has, and you both already know the answer.`,
+Wynn looks at the ruined part in your hands. <span class="say">"...Can you fix it,"</span> she says. It isn't really a question. You're the best she has, and you both already know the shape of the answer.`,
   choices:[
     { key:"1", label:"\"Not with anything in this vault. The seals are a pre-war RobCo part. We don't have one. Nobody made spares.\"",
       to:"a_assembly", effect:chain(sp("I",2), flag("knows_part"),
@@ -561,11 +575,15 @@ Wynn stares at the ruined part in your hands. <span class="say">"...Can you fix 
 a_assembly:{
   crumb:"VAULT 27 · ATRIUM · 19:00",
   text:
-`Wynn calls the whole vault to the atrium, under the painted sky, around the dry stone fountain where children used to throw caps for luck. Two hundred faces. You find the three that matter: Dax near the front with his arms crossed too tight; Cass against the wall, already looking at you; Dottie, small in the crowd, holding someone's hand and watching you because you're the one who fixes things.
+`Wynn calls the whole vault to the atrium, under the painted sky, around the dry stone fountain where children used to throw caps for luck before someone shut the water off in the night two months ago and told everyone it was about supply. Two hundred faces tilted up at her. You find the three that matter: Dax near the front, arms crossed too tight, fingers gone still against his own forearm; Cass against the far wall, already looking at you, hand at the side of her neck; Dottie small in the crowd, holding Aunt Pia's hand, watching you and only you, because you're the one who fixes things.
 
-Wynn doesn't soften it. The pump is dead. The part can't be made down here. Rationing begins tonight, and even at half a cup a day, the reserves give the vault ninety days. Then nothing.
+Wynn doesn't soften it. The pump is dead. The part can't be made down here. Rationing starts tonight, and even at half a cup a day the reserves give the vault ninety days. Then nothing.
 
-The atrium erupts — fear, anger, somebody crying, somebody shouting that the door has to stay shut, it's always stayed shut, the door is the only law that's kept them alive. And Wynn, over the noise, says the thing nobody wants to be true: <span class="say">"There is a town out there. There is pre-war tech out there. If even one of us can reach it and bring back a regulator — we live. If no one goes, in ninety days, none of us do."</span>
+The atrium breaks open — fear, anger, someone crying, someone shouting that the door stays shut, the door has *always* stayed shut, the door is the one law that's kept them alive. And in the middle of it, near the front, a man begins to laugh. Not loud. Not cruel. A soft private chuckle, like he's heard a joke no one told, while two hundred people learn they're dying. The dwellers around him edge away without deciding to. His wife touches his arm and he stops. No one says anything. Wynn doesn't pause.
+
+Off to the side, you catch Reuben Vereen, the water-tech, not reacting at all — just watching Wynn with his stained fingers laced together and his jaw working, slow, like a man chewing on something bitter. *Of course it's the water,* his face is saying, to no one. *It's always the water.* You don't have time to wonder what he means.
+
+Over the noise, Wynn says the thing nobody wants true: <span class="say">"There is a town out there. There is pre-war tech out there. If even one of us can reach it and bring back a regulator — we live. If no one goes, in ninety days, none of us do."</span>
 
 The atrium goes very quiet. Everyone understands what she's asking. Almost no one will meet her eyes.`,
   choices:[
@@ -583,13 +601,13 @@ The atrium goes very quiet. Everyone understands what she's asking. Almost no on
 a_decision:{
   crumb:"VAULT 27 · ATRIUM · 19:20",
   text:
-`You already know it's you. You knew it before Wynn called the assembly. You're the only tech who understands the pump well enough to recognize the right part when you find it; you're young enough to make the walk; and when you look at Dottie's face in that crowd, the math stops being math.
+`You already know it's you. You knew it before Wynn called the assembly — maybe before the pump died, in the part of you that has been the one they send since you were old enough to hold a wrench. You're the only tech who understands the reclamation system well enough to recognize the right part in a heap of pre-war scrap. You're young enough to make the walk. And when you find Dottie's face in that crowd — nine years old, gripping Pia's hand, certain in the way only she can be certain that you can fix anything — the math stops being math.
 
-You say it out loud so the whole vault hears, so no one else's child has to volunteer their parent: <span class="say">"I'll go."</span>
+You say it out loud, so the whole vault hears, so no one else's child has to stand up and volunteer their parent: <span class="say">"I'll go."</span>
 
-The silence breaks differently this time — not panic, but the terrible relief of two hundred people who get to keep being afraid for someone else instead of themselves. Wynn closes her eyes a moment. Dax shoulders to the front, jaw working. Cass hasn't moved from the wall, but her hand is pressed flat over her mouth. And Dottie has gone utterly, frighteningly still.
+The silence breaks differently this time. Not panic — the terrible, shameful relief of two hundred people who get to keep being afraid for someone else instead of themselves. Wynn closes her eyes for a moment. Dax shoulders to the front, jaw working, fingers dead still at his sides. Cass hasn't moved from the wall, but her hand is pressed flat over her mouth now. And Dottie has gone utterly, frighteningly still — the stillness of a child who heard the words *ninety days* through a corridor wall two nights ago and has been carrying them alone ever since, waiting for this exact moment to arrive.
 
-Why you, when it comes down to it — what do you carry out that door?`,
+Why you, when it comes down to it. What is it you carry out that door?`,
   choices:[
     { key:"1", label:"Because they're yours to protect. All of them. That's just what you do.",
       to:"a_goodbye", effect:chain(sp("E",1), sp("S",1), flag("motive_protect"),
@@ -607,13 +625,15 @@ Why you, when it comes down to it — what do you carry out that door?`,
 a_goodbye:{
   crumb:"VAULT 27 · THE DOOR · 21:40",
   text:()=>
-`They don't let you go empty-handed, and they don't let you go alone to the threshold. The vault gathers what it can spare, but the three who matter come with their own gifts, in the corridor before the door.
+`They don't let you go empty-handed, and they don't let you walk to the threshold alone. The vault gathers what it can spare. But the people who matter come with their own gifts, in the corridor before the door, while the painted sky goes dark on its evening cycle overhead.
 
-Dax gets to you first, shoving something heavy and wrapped into your chest. <span class="say">"Lifted it from the security locker. Don't tell Wynn."</span> It's a 10mm pistol and a box of rounds. His grin is doing a lot of work to hold his face together. <span class="say">"You come back, ${state.dwellerName}. You come back, or I'm coming out there to drag you home and I will complain the entire way."</span>
+Dax reaches you first. He's been carrying something heavy in the small of his back since the assembly — three hours now, walking the corridors at your shoulder while you signed the manifests and said the goodbyes, working up to this, because he decided you were going to volunteer before you decided it yourself. He knew. He always knows you first. He shoves it into your chest: a 10mm pistol, a box of rounds. <span class="say">"Lifted it from the security locker. Don't tell Wynn."</span> His grin is doing the work of a structural support. His fingers, for once, are not drumming at all. <span class="say">"You come back, ${state.dwellerName}. You come back, or I swear I will walk out there myself and drag you home and complain the entire way. Don't make me go outside. You know I burn."</span>
 
-Cass presses a doctor's bundle into your hands — stimpaks, a bag of RadAway, everything the clinic could justify losing — and then, quieter, a cracked photo of the two of you under the grow-lights. <span class="say">"So you remember what you're walking back to,"</span> she whispers. She doesn't say the promise out loud. She doesn't have to.
+Cass presses a clinic bundle into your hands — stimpaks, a bag of RadAway, everything she could justify the loss of — and then, quieter, a cracked photo of the two of you under the grow-lights. <span class="say">"So you remember what you're walking back to."</span> Her hand finds the side of her neck; her voice holds level by force. She doesn't say the promise out loud. She doesn't have to. You both know which sky she means.
 
-And Dottie. Dottie steps up last, very brave and very small, and folds something into your palm: a scuffed bottle cap, her lucky one, the one she fished out of the dry fountain years ago. <span class="say">"It's the luckiest thing I have,"</span> Dottie says, voice wobbling. <span class="say">"So you have to bring it back. You have to. That's the rule."</span>`,
+Aunt Pia hugs you hard, smelling of the kitchen and the kid-soap she still uses on Dottie's hair, and tells you to mind the dust, it gets in everything, she'll never forget the dust — and then stops, a half-second too long, reaching for a memory that isn't there, before she covers it with a brisk pat to your cheek. Dottie, beside her, fills the gap without seeming to notice she's doing it: *"She means be careful, big."* She's done it before. She doesn't know she does it.
+
+And then Dottie herself, last, very small and very brave, holding her own left wrist with her other hand the way she does. She folds something into your palm: a scuffed bottle cap, the lucky one, the *best* one — you can tell by the way she's been guarding it that she chose it on purpose, that she's been saving it for an emergency she didn't have a name for until two nights ago. <span class="say">"It's the luckiest thing I have,"</span> she says, and her voice only wobbles once. <span class="say">"So you have to bring it back. You have to. That's the rule."</span> She looks up at you. <span class="say">"...Okay, big?"</span>`,
   effect:chain(
     arm("pistol10mm"), give("ammo10mm",24),
     give("stimpak",3), give("radaway",1), give("cass_locket",1),
@@ -629,14 +649,16 @@ pipboy_boot:{
   crumb:"VAULT 27 · THE DOOR · 21:55",
   text:()=>{
     const t=deriveTitle();
-    return `Last of all, Overseer Wynn. She fits a Pip-Boy 3000 onto your wrist — scratched, warm, older than anyone living — and a small issue pack onto your shoulders, and counts forty caps from the vault's pre-war stash into your hand. <span class="say">"It's not much of a fortune. Out there, they say it buys bread and bullets. Make it last."</span>
+    return `Last of all, Overseer Wynn. She fits a Pip-Boy 3000 onto your wrist — scratched, warm, older than anyone living — and a small issue pack onto your shoulders, and counts forty caps from the vault's pre-war stash into your hand. Her left hand trembles, very slightly, doing it; she steadies it against your wrist and you both pretend not to notice. <span class="say">"It's not much of a fortune. Out there, they say it buys bread and bullets. Make it last."</span>
 
 The Pip-Boy boots with a sweep of green light, syncs to your vitals, and reads back the shape of you — not a job they assigned, but the sum of a life lived in these halls and one long, ordinary day:
 
 <span class="ok">S.P.E.C.I.A.L.  ${specialLine()}</span>
 <span class="ok">The vault knew you as ${state.dwellerName}. The wasteland will come to know you as ${t}.</span>
 
-Wynn holds your gaze. <span class="say">"You were the best of us at the small repairs,"</span> she says. <span class="say">"Now go fix the biggest one. Find the regulator. And ${state.dwellerName} — come home. That's not an order. It's the only thing I've got left to ask."</span>
+Wynn holds your gaze a moment longer than the handoff needs — that same second sentence behind her eyes from the corridor this morning, the one she's carried so long it's worn smooth. This time she lets a corner of it out. <span class="say">"There's a thing I should have told you years ago, ${state.dwellerName}. A thing about this place. Not now — there's no time, and you couldn't carry it and the walk both."</span> Her jaw sets. <span class="say">"When you come back — and I mean *when*, not if — I want you to make me say it. Promise me you'll make me say it."</span>
+
+Then, softer, the only thing she has left to ask: <span class="say">"You were the best of us at the small repairs. Go fix the biggest one. Find the regulator. And come home."</span>
 
 <span class="ok">[ Your Pip-Boy is online — tap ▸ PIP-BOY to view STAT, your pack (INV), and your journal & the people you carry (DATA). ]</span>`;
   },
